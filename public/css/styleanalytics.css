@@ -1,0 +1,142 @@
+body, html {
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f5f5f5; /* Update background color */
+}
+
+.summary-box {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%; /* Memastikan elemen ini mengisi penuh container */
+}
+
+.summary-box:hover {
+    transform: translateY(-10px);
+}
+
+.summary-box h2 {
+    margin-top: 20px; /* Jarak atas */
+    margin-bottom: 15px; /* Jarak bawah */
+}
+
+.summary-box p {
+    margin-bottom: 10px; /* Jarak antara paragraf */
+}
+
+/* Setting the row to make sure all boxes are of equal height */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch; /* Make sure all summary-box are stretched to equal height */
+}
+
+.col-md-6 {
+    display: flex;
+}
+
+.col-md-6 .summary-box {
+    flex-grow: 1; /* Grow each summary-box to fill the space equally */
+    min-height: 250px; /* Set minimum height to keep consistent look */
+}
+
+.summary-icon {
+    font-size: 50px;
+    color: #C02016;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    color: #C02016;
+    font-weight: 700;
+    flex-grow: 1;
+    margin: 0;
+}
+
+h2 {
+    color: #333;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+p {
+    color: #666;
+    font-size: 17px;
+}
+
+.highlighted-count {
+    cursor: pointer;
+    font-size: 17px;
+    color: #ff0000; /* Warna teks */
+    text-decoration: underline; /* Underline pada angka */
+    font-weight: bold; /* Menebalkan angka */
+}
+
+.highlighted-count:hover {
+    color: #cf0000; /* Warna teks saat dihover */
+}
+
+#show-indibiz, #show-non-customer {
+    margin: 5px;
+}
+
+.btn-light {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-light i {
+    margin-right: 5px;
+}
+
+.btn-primary {
+    background-color: #C02016;
+    border: 1px solid #C02016;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: darkred;
+}
+
+.btn-primary:active {
+    background-color: red;
+}
+
+.btn-secondary {
+    background-color: #9e9e9e;
+    border: 1px solid #a9a9a9;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background-color: darkred;
+}
+
+.btn-secondary:active {
+    background-color: red;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}

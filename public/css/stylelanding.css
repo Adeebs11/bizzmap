@@ -1,0 +1,79 @@
+@keyframes backgroundScroll {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  animation: backgroundScroll 30s linear infinite;
+  position: relative;
+
+  background-image: url('/img/peta.png');
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.7); /* Warna dan opasitas overlay untuk efek gelap */
+  z-index: 1; /* Pastikan overlay berada di atas background */
+}
+
+.content {
+  position: relative;
+  z-index: 2; /* Pastikan konten berada di atas overlay */
+  text-align: center;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.btn-login {
+  font-size: 18px;
+  font-weight: 500;
+  background-color: transparent;
+  color: rgb(255, 255, 255);
+  border: 2px solid white;
+  padding: 10px 40px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  margin-top: 40px; /* Menambahkan jarak atas untuk memisahkan dari paragraf */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  
+}
+
+.btn-login:hover {
+  background-color: #b30000;
+  color: #ffffff;
+}
+
+.btn-login:active {
+  transform: scale(0.95); /* Slightly decrease size when clicked */
+}
+
+h1 {
+  font-size: 45px;
+  margin-top: 10px;
+  color: #ffffff;
+  font-weight: 700; /* Mengatur font-weight untuk h1 */
+}
+
+p {
+  font-size: 20px;
+  margin-top: 30px;
+  color: #ffffff;
+  font-weight: 500; /* Mengatur font-weight untuk paragraf */
+}
