@@ -51,17 +51,6 @@
                     <canvas id="newChart"></canvas>
                 </div>
             </div>
-            <!-- Hapus grafik berikut ini jika tidak diperlukan -->
-            <!--
-            <div class="row mb-4">
-                <div class="col-md-6 chart-container">
-                    <canvas id="ageGenderChart"></canvas>
-                </div>
-                <div class="col-md-6 chart-container">
-                    <canvas id="userLocationChart"></canvas>
-                </div>
-            </div>
-            -->
         </div>
     </div>
     <script src="{{ asset('js/demografi.js') }}"></script>
