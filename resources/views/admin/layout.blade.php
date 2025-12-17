@@ -46,8 +46,9 @@
 
             {{-- Placeholder untuk langkah berikutnya --}}
             <li class="nav-item">
-                <a class="nav-link text-white disabled" href="#">
-                    Kelola User (Soon)
+                <a class="nav-link text-white {{ request()->routeIs('admin.users') ? 'active bg-primary' : '' }}"
+                href="{{ route('admin.users') }}">
+                    Kelola User
                 </a>
             </li>
         </ul>
