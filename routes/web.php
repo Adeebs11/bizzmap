@@ -36,3 +36,8 @@ Route::get('/register', [UserController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [UserController::class, 'register']);
 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+
+
+Route::get('/admin-test', function () {
+    return 'Admin OK';
+})->middleware(['auth', 'admin']);
