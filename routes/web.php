@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
 
 // Landing page
 Route::get("/", function () {    
@@ -41,3 +42,9 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::get('/admin-test', function () {
     return 'Admin OK';
 })->middleware(['auth', 'admin']);
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/pending', [AdminController::class, 'pending'])->name('admin.pending');
+    Route::post('/pending/{id}/approve', [AdminController::class, 'approve'])->name('admin.approve');
+});
