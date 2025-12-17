@@ -1,26 +1,11 @@
-<!doctype html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pending Approval - BizzMap</title>
+@extends('admin.layout')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+@section('title', 'Data Pending - BizzMap')
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="{{ route('admin.dashboard') }}">BizzMap Admin</a>
-        <div class="ms-auto d-flex gap-2">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-light btn-sm">Dashboard</a>
-            <a href="{{ url('/menu') }}" class="btn btn-outline-light btn-sm">Menu</a>
-        </div>
+@section('content')
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">Data Pending</h3>
     </div>
-</nav>
-
-<div class="container py-4">
-    <h3 class="mb-3">Data Pending</h3>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -54,9 +39,7 @@
                                     <td>
                                         <form method="POST" action="{{ route('admin.approve', $loc->id) }}">
                                             @csrf
-                                            <button class="btn btn-success btn-sm" type="submit">
-                                                Approve
-                                            </button>
+                                            <button class="btn btn-success btn-sm" type="submit">Approve</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -67,9 +50,4 @@
             @endif
         </div>
     </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection
