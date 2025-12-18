@@ -113,39 +113,51 @@ class AdminController extends Controller
             return back()->with('success', 'Role user berhasil diperbarui.');
         }
 
-        public function editUser($id)
-{
-    $user = User::findOrFail($id);
-    return view('admin.user-edit', compact('user'));
-}
+                public function editUser($id)
+        {
+            $user = User::findOrFail($id);
+            return view('admin.user-edit', compact('user'));
+        }
 
-public function updateUser(Request $request, $id)
-{
-    $user = User::findOrFail($id);
+        public function updateUser(Request $request, $id)
+        {
+            $user = User::findOrFail($id);
 
-    $request->validate([
-        'name' => 'required|string|max:100',
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'role' => 'required|in:admin,user',
-        'password' => 'nullable|min:6',
-    ]);
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'role' => 'required|in:admin,user',
+                'password' => 'nullable|min:6',
+            ]);
 
-    // Hindari kamu “ngunci diri sendiri” jadi user
-    if ($user->id === auth()->id() && $request->role !== 'admin') {
-        return back()->with('error', 'Tidak bisa menurunkan role akun admin yang sedang login.');
-    }
+            // Hindari kamu “ngunci diri sendiri” jadi user
+            if ($user->id === auth()->id() && $request->role !== 'admin') {
+                return back()->with('error', 'Tidak bisa menurunkan role akun admin yang sedang login.');
+            }
 
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->role = $request->role;
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->role = $request->role;
 
-    if ($request->filled('password')) {
-        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
-    }
+            if ($request->filled('password')) {
+                $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            }
 
-    $user->save();
+            $user->save();
 
-    return redirect()->route('admin.users')->with('success', 'User berhasil diperbarui.');
-}
+            return redirect()->route('admin.users')->with('success', 'User berhasil diperbarui.');
+        }
+
+        public function reject($id)
+        {
+            $location = \App\Models\Location::findOrFail($id);
+
+            // hanya boleh reject jika masih pending
+            if ($location->status === 'pending') {
+                $location->delete();
+            }
+
+            return redirect()->back()->with('success', 'Data pending berhasil dihapus (reject).');
+        }
 
 }

@@ -2,14 +2,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Leaflet Map</title>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  
   <link rel="stylesheet" href="https://unpkg.com/leaflet-search/dist/leaflet-search.min.css" />
   <script src="https://unpkg.com/leaflet-search/dist/leaflet-search.min.js"></script>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXhW+ALEwIH" crossorigin="anonymous">
   <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}" />
   <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -42,23 +42,23 @@
       </div>
       <form id="dataForm">
         <h2>Add Data</h2>
-        <div class="input-group">
+        <div class="field-group">
           <label for="customerName">Nama Customer</label>
           <input type="text" id="customerName" name="customerName" required>
         </div>
-        <div class="input-group">
+        <div class="field-group">
           <label for="address">Alamat</label>
           <input type="text" id="address" name="address" required>
         </div>
-        <div class="input-group">
+        <div class="field-group">
           <label for="latitude">Latitude</label>
           <input type="number" id="latitude" name="latitude" step="any" required>
         </div>
-        <div class="input-group">
+        <div class="field-group">
           <label for="longitude">Longitude</label>
           <input type="number" id="longitude" name="longitude" step="any" required>
         </div>
-        <div class="input-group">
+        <div class="field-group">
           <label for="type">Tipe Customer</label>
           <div class="radio-group">
             <input type="radio" id="indibiz" name="type" value="Indibiz" required>
@@ -68,7 +68,7 @@
           </div>
         </div>
         
-        <div class="input-group" id="segmen-indibiz" style="display: none;">
+        <div class="field-group" id="segmen-indibiz" style="display: none;">
           <label for="segmenIndibiz">Segmen Indibiz</label>
           <select id="segmenIndibiz" name="segmenIndibiz">
             <option value="Indibiz Sekolah">Indibiz Sekolah</option>
@@ -81,7 +81,7 @@
           </select>
         </div>
         
-        <div class="input-group" id="segmen-non-customer" style="display: none;">
+        <div class="field-group" id="segmen-non-customer" style="display: none;">
           <label for="segmenNonCustomer">Segmen Non-Customer</label>
           <select id="segmenNonCustomer" name="segmenNonCustomer">
             <option value="Sekolah">Sekolah</option>
@@ -108,7 +108,16 @@
         </div>
         <button id="back-to-form-button" class="btn btn-secondary">Kembali ke Form</button>
       </div>
-      
+
+      <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 3000;">
+        <div id="submitToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body" id="submitToastMsg">Pesan...</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+
   <script>
     var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -173,6 +182,51 @@
 
     var markerGroup = L.layerGroup().addTo(map);
 
+        function mapUiTypeToDb(uiType) {
+      return uiType === 'Indibiz' ? 'customer' : 'non_customer';
+    }
+
+    function mapUiSegmentToDb(uiType, uiSegment) {
+      // uiSegment contoh: "Indibiz Ruko" atau "Ruko"
+      let s = uiSegment.toLowerCase();
+
+      // rapikan beberapa variasi penulisan
+      s = s.replace('indibiz ', '');
+      s = s.replace('multifinance', 'multifinance');
+      s = s.replace('multi finance', 'multifinance');
+
+      // mapping ke enum DB
+      if (s.includes('sekolah')) return 'sekolah';
+      if (s.includes('ruko')) return 'ruko';
+      if (s.includes('hotel')) return 'hotel';
+      if (s.includes('multifinance')) return 'multifinance';
+      if (s.includes('health')) return 'health';
+      if (s.includes('ekspedisi')) return 'ekspedisi';
+      if (s.includes('energy')) return 'energi';
+
+      return 'ruko'; // fallback aman
+    }
+
+    function mapDbTypeToUi(dbType) {
+      return dbType === 'customer' ? 'Indibiz' : 'Non-Customer';
+    }
+
+    function mapDbSegmentToUi(dbType, dbSegment) {
+      const labelMap = {
+        sekolah: 'Sekolah',
+        ruko: 'Ruko',
+        hotel: 'Hotel',
+        multifinance: 'MultiFinance',
+        health: 'Health',
+        ekspedisi: 'Ekspedisi',
+        energi: 'Energy',
+      };
+
+      const base = labelMap[dbSegment] ?? 'Ruko';
+      return dbType === 'customer' ? `Indibiz ${base}` : base;
+    }
+
+
     function toggleSegmenOptions() {
         var type = document.querySelector('input[name="type"]:checked').value;
         var segmenIndibiz = document.getElementById('segmen-indibiz');
@@ -187,7 +241,6 @@
         }
     }
 
-    
     document.addEventListener('DOMContentLoaded', function() {
   const radioButtons = document.querySelectorAll('input[name="type"]');
   const dataForm = document.getElementById('dataForm');
@@ -199,28 +252,40 @@
   });
 });
 
-    document.getElementById('dataForm').addEventListener('submit', function(e) {
+      document.getElementById('dataForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        var name = document.getElementById('customerName').value;
-        var address = document.getElementById('address').value;
-        var lat = parseFloat(document.getElementById('latitude').value);
-        var lng = parseFloat(document.getElementById('longitude').value);
-        var type = document.querySelector('input[name="type"]:checked').value;
-        var segmen = (type === "Indibiz") ? document.getElementById('segmenIndibiz').value : document.getElementById('segmenNonCustomer').value;
 
-        addMarker(name, lat, lng, address, type, segmen);
-        saveData(name, lat, lng, address, type, segmen);
-    });
+        const name = document.getElementById('customerName').value?.trim();
+        const address = document.getElementById('address').value?.trim();
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+
+        const typeEl = document.querySelector('input[name="type"]:checked');
+        const type = typeEl ? typeEl.value : null;
+
+        const segmen = (type === "Indibiz")
+          ? document.getElementById('segmenIndibiz').value
+          : document.getElementById('segmenNonCustomer').value;
+
+        // validasi sederhana biar tidak silent fail
+        if (!name || !address || Number.isNaN(lat) || Number.isNaN(lng) || !type || !segmen) {
+          showSubmitPopup('Form belum lengkap. Mohon isi semua field.', 'danger');
+          return;
+        }
+
+        // ✅ kirim ke DB dan tunggu hasilnya
+        await saveData(name, lat, lng, address, type, segmen);
+
+        // OPTIONAL: bersihkan input / tutup sidebar kalau kamu mau
+        // document.getElementById('customerName').value = '';
+      });
+
 
     document.getElementById('goals-plan-button').addEventListener('click', function() {
     document.getElementById('dataForm').style.display = 'none';
     document.getElementById('goals-plan').style.display = 'block';
     loadGoalsPlan();
 });
-
-
-
 
 function loadGoalsPlan() {
     var markers = JSON.parse(localStorage.getItem('markers')) || [];
@@ -312,19 +377,119 @@ function loadGoalsPlan() {
         );
         localStorage.setItem('markers', JSON.stringify(markers));
     }
+              function showSubmitPopup(message, type = 'success') {
+          const toastEl = document.getElementById('submitToast');
+          const msgEl = document.getElementById('submitToastMsg');
 
-    function saveData(name, lat, lng, address, type, segmen) {
-    let markers = JSON.parse(localStorage.getItem('markers')) || [];
-    markers.push({ name, latitude: lat, longitude: lng, address, type, segmen });
-    localStorage.setItem('markers', JSON.stringify(markers));
-}
+          if (!toastEl || !msgEl) {
+            // fallback biar tidak silent fail
+            alert(message);
+            return;
+          }
 
+          msgEl.textContent = message;
 
-    function loadMarkers() {
-        var markers = JSON.parse(localStorage.getItem('markers')) || [];
-        markers.forEach(function(marker) {
-            addMarker(marker.name, marker.latitude, marker.longitude, marker.address, marker.type, marker.segmen);
-        });
+          toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+          if (type === 'danger') toastEl.classList.add('text-bg-danger');
+          else if (type === 'warning') toastEl.classList.add('text-bg-warning');
+          else if (type === 'info') toastEl.classList.add('text-bg-info');
+          else toastEl.classList.add('text-bg-success');
+
+          // pastikan bootstrap.Toast ada
+          if (typeof bootstrap === 'undefined' || !bootstrap.Toast) {
+            alert(message);
+            return;
+          }
+
+          const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+          toast.show();
+        }
+
+          async function saveData(name, lat, lng, address, type, segmen) {
+            try {
+              const csrf = document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute('content');
+
+              const dbType = (type === 'Indibiz') ? 'customer' : 'non_customer';
+              const dbSegment = mapUiSegmentToDb(type, segmen);
+
+              const payload = {
+                name: name,
+                address: address,
+                latitude: lat,
+                longitude: lng,
+                type: dbType,
+                segment: dbSegment
+              };
+
+              const res = await fetch("{{ route('locations.store') }}", {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': csrf,
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+              });
+
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                console.error('Save error:', err);
+                showSubmitPopup(
+                  'Gagal mengirim data. Cek input dan coba lagi.',
+                  'danger'
+                );
+                return;
+              }
+
+              const data = await res.json();
+              showSubmitPopup(
+                data.message || 'Data dikirim. Menunggu verifikasi admin.',
+                'success'
+              );
+
+            } catch (e) {
+              console.error('Fetch error:', e);
+              showSubmitPopup(
+                'Terjadi error koneksi / script. Coba refresh halaman.',
+                'danger'
+              );
+            }
+          }
+ 
+
+        async function loadMarkers() {
+      // ambil dari server
+      const res = await fetch("{{ route('locations.approved') }}", {
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const rows = await res.json();
+
+      // (opsional) simpan ke localStorage agar fitur goals plan / download kamu yang masih pakai localStorage tetap jalan
+      const markersForLocal = rows.map(r => ({
+        name: r.name,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        address: r.address,
+        type: mapDbTypeToUi(r.type),
+        segmen: mapDbSegmentToUi(r.type, r.segment),
+      }));
+      localStorage.setItem('markers', JSON.stringify(markersForLocal));
+
+      // render ke map
+      markerGroup.clearLayers();
+      rows.forEach(r => {
+        addMarker(
+          r.name,
+          r.latitude,
+          r.longitude,
+          r.address,
+          mapDbTypeToUi(r.type),
+          mapDbSegmentToUi(r.type, r.segment)
+        );
+      });
     }
 
     loadMarkers();
@@ -467,19 +632,36 @@ function loadGoalsPlan() {
       window.URL.revokeObjectURL(url);
   });
 
-// Misalnya tombol di dalam goals plan untuk kembali ke form
-document.getElementById('goals-plan-button').addEventListener('click', function() {
-  document.getElementById('dataForm').style.display = 'none';
-  document.getElementById('goals-plan').style.display = 'block';
-  document.getElementById('goals-plan-button').style.display = 'none'; 
-  loadGoalsPlan(); // Pastikan ini memuat goals plan dari local storage
-});
+      // Misalnya tombol di dalam goals plan untuk kembali ke form
+      document.getElementById('goals-plan-button').addEventListener('click', function() {
+        document.getElementById('dataForm').style.display = 'none';
+        document.getElementById('goals-plan').style.display = 'block';
+        document.getElementById('goals-plan-button').style.display = 'none'; 
+        loadGoalsPlan(); // Pastikan ini memuat goals plan dari local storage
+      });
 
-document.getElementById('back-to-form-button').addEventListener('click', function() {
-  document.getElementById('dataForm').style.display = 'block';
-  document.getElementById('goals-plan').style.display = 'none';
-  document.getElementById('goals-plan-button').style.display = 'block';
-});
+      document.getElementById('back-to-form-button').addEventListener('click', function() {
+        document.getElementById('dataForm').style.display = 'block';
+        document.getElementById('goals-plan').style.display = 'none';
+        document.getElementById('goals-plan-button').style.display = 'block';
+      });
+
+      function showSubmitPopup(message, type = 'success') {
+      const toastEl = document.getElementById('submitToast');
+      const msgEl = document.getElementById('submitToastMsg');
+
+      msgEl.textContent = message;
+
+      // ganti warna berdasarkan type
+      toastEl.classList.remove('text-bg-success','text-bg-danger','text-bg-warning','text-bg-info');
+      if (type === 'danger') toastEl.classList.add('text-bg-danger');
+      else if (type === 'warning') toastEl.classList.add('text-bg-warning');
+      else if (type === 'info') toastEl.classList.add('text-bg-info');
+      else toastEl.classList.add('text-bg-success');
+
+      const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+      toast.show();
+    }
 
   </script>
 </body>

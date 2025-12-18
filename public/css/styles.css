@@ -148,7 +148,7 @@ input:focus {
   background-color: white;
   border: 2px solid #b2b2b2;
   border-radius: 4px;
-  width: 27px;
+  width: 47px;
   padding: 8px;
   cursor: pointer;
   z-index: 1000;
@@ -205,14 +205,14 @@ h2 {
 }
 
 
-.input-group label {
+.field-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: 700;
   color: #333;
 }
 
-.input-group input, .input-group select {
+.field-group input, .field-group select {
   width: 100%;
   margin-bottom: 5px;
   padding: 10px;

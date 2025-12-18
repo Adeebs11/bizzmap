@@ -2,6 +2,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LocationController;
+
 
 // Landing page
 Route::get("/", function () {    
@@ -52,6 +54,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     ->name('admin.users.role');
     Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::post('/pending/{id}/reject', [AdminController::class, 'reject'])->name('admin.reject');
 
+});
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/locations/approved', [LocationController::class, 'approved'])->name('locations.approved');
+    Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');
 });

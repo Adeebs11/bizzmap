@@ -36,12 +36,18 @@
                                     <td>{{ $loc->latitude }}, {{ $loc->longitude }}</td>
                                     <td>{{ $loc->type }}</td>
                                     <td>{{ $loc->segment }}</td>
-                                    <td>
-                                        <form method="POST" action="{{ route('admin.approve', $loc->id) }}">
-                                            @csrf
-                                            <button class="btn btn-success btn-sm" type="submit">Approve</button>
-                                        </form>
-                                    </td>
+                                        <td class="d-flex gap-2">
+                                            <form method="POST" action="{{ route('admin.approve', $loc->id) }}">
+                                                @csrf
+                                                <button class="btn btn-success btn-sm" type="submit">Approve</button>
+                                            </form>
+
+                                            <form method="POST" action="{{ route('admin.reject', $loc->id) }}"
+                                                onsubmit="return confirm('Reject data ini? Data akan dihapus.');">
+                                                @csrf
+                                                <button class="btn btn-danger btn-sm" type="submit">Reject</button>
+                                            </form>
+                                        </td>
                                 </tr>
                             @endforeach
                         </tbody>
