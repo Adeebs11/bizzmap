@@ -160,4 +160,60 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Data pending berhasil dihapus (reject).');
         }
 
+            public function locations(Request $request)
+        {
+            // filter
+            $type = $request->query('type');       // customer / non_customer / null
+            $segment = $request->query('segment'); // sekolah/ruko/... / null
+            $q = $request->query('q');             // search
+
+            // sort
+            $sortBy = $request->query('sort_by', 'created_at'); // created_at / type / segment
+            $sortDir = $request->query('sort_dir', 'desc');     // asc / desc
+
+            // whitelist untuk keamanan
+            $allowedSortBy = ['created_at', 'type', 'segment'];
+            if (!in_array($sortBy, $allowedSortBy, true)) $sortBy = 'created_at';
+
+            $allowedSortDir = ['asc', 'desc'];
+            if (!in_array($sortDir, $allowedSortDir, true)) $sortDir = 'desc';
+
+            $allowedSegments = ['sekolah','ruko','hotel','multifinance','health','ekspedisi','energi'];
+
+            $query = Location::where('status', 'approved');
+
+            // filter type
+            if ($type === 'customer' || $type === 'non_customer') {
+                $query->where('type', $type);
+            }
+
+            // filter segment
+            if ($segment && in_array($segment, $allowedSegments, true)) {
+                $query->where('segment', $segment);
+            }
+
+            // search
+            if ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('address', 'like', "%{$q}%");
+                });
+            }
+
+            // sorting
+            $query->orderBy($sortBy, $sortDir);
+
+            $locations = $query->paginate(10)->withQueryString();
+
+            return view('admin.locations', compact(
+                'locations',
+                'type',
+                'segment',
+                'sortBy',
+                'sortDir',
+                'q'
+            ));
+        }
+
+
 }
