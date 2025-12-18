@@ -49,7 +49,7 @@
                 <li class="nav-item">
                 <a class="nav-link text-white {{ request()->routeIs('admin.locations') ? 'active bg-primary' : '' }}"
                     href="{{ route('admin.locations') }}">
-                    Data Lokasi
+                    Data Customer & Non-Cust
                 </a>
                 </li>
 

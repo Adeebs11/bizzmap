@@ -215,5 +215,36 @@ class AdminController extends Controller
             ));
         }
 
+        public function editLocation($id)
+    {
+        $location = \App\Models\Location::findOrFail($id);
+        return view('admin.locations_edit', compact('location'));
+    }
+
+        public function updateLocation(\Illuminate\Http\Request $request, $id)
+    {
+        $location = \App\Models\Location::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'address' => 'required|string',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'type' => 'required|in:customer,non_customer',
+            'segment' => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
+        ]);
+
+        $location->update($validated);
+
+        return redirect()->route('admin.locations')->with('success', 'Data lokasi berhasil diperbarui.');
+    }
+
+    public function deleteLocation($id)
+    {
+        $location = \App\Models\Location::findOrFail($id);
+        $location->delete();
+
+        return redirect()->back()->with('success', 'Data lokasi berhasil dihapus.');
+    }
 
 }

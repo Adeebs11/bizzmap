@@ -1,10 +1,10 @@
 @extends('admin.layout')
 
-@section('title', 'Data Lokasi - BizzMap')
+@section('title', 'Data Customer & Non-Cust - BizzMap')
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-3">
-    <h3 class="mb-0">Data Lokasi</h3>
+    <h3 class="mb-0">Data Customer & Non-Cust</h3>
 </div>
 
 <form class="d-flex flex-wrap align-items-center gap-2 mb-3"
@@ -65,7 +65,6 @@
   </div>
 </form>
 
-
 <div class="card shadow-sm">
     <div class="card-body">
         @if($locations->isEmpty())
@@ -81,13 +80,14 @@
                             <th>Tipe</th>
                             <th>Segmen</th>
                             <th>Dibuat</th>
+                            <th style="width:140px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($locations as $loc)
                             <tr>
                                 <td>{{ $loc->name }}</td>
-                                <td style="max-width:360px">{{ $loc->address }}</td>
+                                <td style="max-width:240px">{{ $loc->address }}</td>
                                 <td>{{ $loc->latitude }}, {{ $loc->longitude }}</td>
                                 <td>
                                     <span class="badge {{ $loc->type === 'customer' ? 'text-bg-success' : 'text-bg-secondary' }}">
@@ -96,7 +96,21 @@
                                 </td>
                                 <td>{{ $loc->segment }}</td>
                                 <td>{{ $loc->created_at?->format('Y-m-d') }}</td>
+
+                                <td class="d-flex gap-2">
+                                <a href="{{ route('admin.locations.edit', $loc->id) }}" class="btn btn-success btn-sm">
+                                    Edit
+                                </a>
+
+                                <form method="POST" action="{{ route('admin.locations.delete', $loc->id) }}"
+                                    onsubmit="return confirm('Hapus data ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                </form>
+                            </td>
                             </tr>
+                            
                         @endforeach
                     </tbody>
                 </table>

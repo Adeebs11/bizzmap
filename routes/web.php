@@ -56,6 +56,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::post('/pending/{id}/reject', [AdminController::class, 'reject'])->name('admin.reject');
     Route::get('/locations', [AdminController::class, 'locations'])->name('admin.locations');
+    Route::get('/locations/{id}/edit', [AdminController::class, 'editLocation'])->name('admin.locations.edit');
+    Route::put('/locations/{id}', [AdminController::class, 'updateLocation'])->name('admin.locations.update');
+    Route::delete('/locations/{id}', [AdminController::class, 'deleteLocation'])->name('admin.locations.delete');
 
 });
 

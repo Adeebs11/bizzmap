@@ -350,7 +350,6 @@ function loadGoalsPlan() {
                 <div class='popup-item'><strong>Koordinat: </strong>${lat}, ${lng}</div>
                 <div class='popup-item'><strong>Tipe: </strong>${type}</div>
                 <div class='popup-item'><strong>Segmen: </strong>${segmen}</div>
-                <button class='btn-delete-marker'><i class='fas fa-trash-alt'></i></button>
             </div>`
         );
 
