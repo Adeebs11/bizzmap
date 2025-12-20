@@ -540,34 +540,84 @@ function loadGoalsPlan() {
         document.getElementById('longitude').value = lng;
     });
 
-    // Fungsi untuk membaca file CSV dan menambahkan marker
-    document.getElementById('upload-csv').addEventListener('change', function(event) {
-        var file = event.target.files[0];
-        Papa.parse(file, {
-            header: true,
-            dynamicTyping: true,
-            complete: function(results) {
-                clearMarkers(); // Hapus semua marker lama sebelum menambahkan yang baru
+    // Fungsi untuk membaca file CSV dan menambahkan marker Papa.parse
+    // document.getElementById('upload-csv').addEventListener('change', function(event) {
+    //     var file = event.target.files[0];
+    //     Papa.parse(file, {
+    //         header: true,
+    //         dynamicTyping: true,
+    //         complete: function(results) {
+    //             clearMarkers(); // Hapus semua marker lama sebelum menambahkan yang baru
 
-                var markers = results.data.filter(row => row.latitude && row.longitude);
+    //             var markers = results.data.filter(row => row.latitude && row.longitude);
                 
-                markers = markers.map(marker => {
-                    return {
-                        name: marker.name ? marker.name.trim() : 'Unknown',
-                        latitude: marker.latitude,
-                        longitude: marker.longitude,
-                        address: marker.address ? marker.address.trim() : 'No Address',
-                        type: marker.type ? marker.type.trim() : 'Unknown',
-                        segmen: marker.segmen ? marker.segmen.trim() : 'No Segment'
-                    };
-                });
+    //             markers = markers.map(marker => {
+    //                 return {
+    //                     name: marker.name ? marker.name.trim() : 'Unknown',
+    //                     latitude: marker.latitude,
+    //                     longitude: marker.longitude,
+    //                     address: marker.address ? marker.address.trim() : 'No Address',
+    //                     type: marker.type ? marker.type.trim() : 'Unknown',
+    //                     segmen: marker.segmen ? marker.segmen.trim() : 'No Segment'
+    //                 };
+    //             });
 
-                markers.forEach(function(row) {
-                    addMarker(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
-                    saveData(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
-                });
-            }
+    //             markers.forEach(function(row) {
+    //                 addMarker(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
+    //                 saveData(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
+    //             });
+    //         }
+    //     });
+    // });
+
+    document.getElementById('upload-csv').addEventListener('change', async function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch("{{ route('locations.import') }}", {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json'
+          },
+          body: formData
         });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          console.error('Import error:', data);
+          showSubmitPopup(data.message || 'Import gagal. Cek format CSV.', 'danger');
+          return;
+        }
+
+        // sukses
+        const inserted = data.inserted ?? 0;
+        const failed = data.failed ?? 0;
+
+        if (failed > 0) {
+          showSubmitPopup(`Import selesai: ${inserted} baris masuk (pending), ${failed} baris gagal.`, 'warning');
+          console.warn('Import row errors:', data.errors);
+        } else {
+          showSubmitPopup(`Import berhasil: ${inserted} baris masuk (pending). Menunggu verifikasi admin.`, 'success');
+        }
+
+        // refresh marker approved (yang pending memang belum tampil)
+        await loadMarkers();
+
+      } catch (e) {
+        console.error('Import fetch error:', e);
+        showSubmitPopup('Terjadi error koneksi saat upload CSV. Coba lagi.', 'danger');
+      } finally {
+        // reset input supaya bisa upload file yang sama lagi tanpa harus rename
+        event.target.value = '';
+      }
     });
 
     function clearMarkers() {

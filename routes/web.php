@@ -31,7 +31,6 @@ Route::get('/landing', function () {
     return view('landing');
 });
 
-// Routes untuk login, register, dan logout
 Route::get('/login', [UserController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [UserController::class, 'login']);
 
@@ -65,4 +64,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/locations/approved', [LocationController::class, 'approved'])->name('locations.approved');
     Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');
+    Route::post('/locations/import', [LocationController::class, 'import'])->name('locations.import');
 });
