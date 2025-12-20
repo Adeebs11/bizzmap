@@ -80,15 +80,20 @@
                             <th>Tipe</th>
                             <th>Segmen</th>
                             <th>Dibuat</th>
-                            <th style="width:140px;">Aksi</th>
+                            <th style="width:170px;" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($locations as $loc)
                             <tr>
                                 <td>{{ $loc->name }}</td>
-                                <td style="max-width:240px">{{ $loc->address }}</td>
-                                <td>{{ $loc->latitude }}, {{ $loc->longitude }}</td>
+                                <td>
+                                <div class="text-truncate" style="max-width: 360px;" title="{{ $loc->address }}">
+                                    {{ $loc->address }}
+                                </div>
+                                </td>
+
+                                <td class="text-nowrap">{{ $loc->latitude }}, {{ $loc->longitude }}</td>
                                 <td>
                                     <span class="badge {{ $loc->type === 'customer' ? 'text-bg-success' : 'text-bg-secondary' }}">
                                         {{ $loc->type }}
@@ -97,18 +102,20 @@
                                 <td>{{ $loc->segment }}</td>
                                 <td>{{ $loc->created_at?->format('Y-m-d') }}</td>
 
-                                <td class="d-flex gap-2">
-                                <a href="{{ route('admin.locations.edit', $loc->id) }}" class="btn btn-success btn-sm">
-                                    Edit
-                                </a>
+<td class="text-center text-nowrap">
+  <div class="d-inline-flex gap-2">
+    <a href="{{ route('admin.locations.edit', $loc->id) }}" class="btn btn-success btn-sm">
+      Edit
+    </a>
 
-                                <form method="POST" action="{{ route('admin.locations.delete', $loc->id) }}"
-                                    onsubmit="return confirm('Hapus data ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
-                                </form>
-                            </td>
+    <form method="POST" action="{{ route('admin.locations.delete', $loc->id) }}"
+      onsubmit="return confirm('Hapus data ini?');">
+      @csrf
+      @method('DELETE')
+      <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+    </form>
+  </div>
+</td>
                             </tr>
                             
                         @endforeach
