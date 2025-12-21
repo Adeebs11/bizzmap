@@ -19,8 +19,19 @@ class AdminController extends Controller
     }
 
     // List data yang pending
-    public function pending()
+    public function pending(Request $request)
     {
+
+        $perPage = (int) $request->query('per_page', 10);
+        $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
+        $locations = Location::where('status', 'pending')
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('admin.pending', compact('locations', 'perPage'));
+
         $locations = Location::where('status', 'pending')
             ->latest()
             ->get();
@@ -171,6 +182,9 @@ class AdminController extends Controller
             $sortBy = $request->query('sort_by', 'created_at'); // created_at / type / segment
             $sortDir = $request->query('sort_dir', 'desc');     // asc / desc
 
+            $perPage = (int) $request->query('per_page', 10);
+            $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
             // whitelist untuk keamanan
             $allowedSortBy = ['created_at', 'type', 'segment', 'name', 'address', 'coordinates'];
             if (!in_array($sortBy, $allowedSortBy, true)) $sortBy = 'created_at';
@@ -210,16 +224,10 @@ class AdminController extends Controller
 }
 
 
-            $locations = $query->paginate(10)->withQueryString();
+            $locations = $query->paginate($perPage)->withQueryString();
 
-            return view('admin.locations', compact(
-                'locations',
-                'type',
-                'segment',
-                'sortBy',
-                'sortDir',
-                'q'
-            ));
+            return view('admin.locations', compact('locations', 'type', 'segment', 'q', 'sortBy', 'sortDir', 'perPage'));
+
         }
 
         public function editLocation($id)

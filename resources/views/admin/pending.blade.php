@@ -137,6 +137,45 @@
 
                             </tbody>
                         </table>
+
+                            @php
+                            $from = $locations->firstItem() ?? 0;
+                            $to   = $locations->lastItem() ?? 0;
+                            $total = $locations->total();
+                            @endphp
+
+                            <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted">Rows per page</span>
+
+                                <form id="pendingPerPageForm" method="GET" action="{{ url()->current() }}" class="d-inline">
+                                @foreach(request()->except('per_page', 'page') as $k => $v)
+                                    <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                                @endforeach
+
+                                <select name="per_page" id="pendingPerPageSelect" class="form-select form-select-sm" style="width:90px">
+                                    <option value="10"  {{ ($perPage ?? 10) == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25"  {{ ($perPage ?? 10) == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50"  {{ ($perPage ?? 10) == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ ($perPage ?? 10) == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                                </form>
+
+                                <span class="text-muted">|</span>
+                                <span class="text-muted">Showing {{ $from }} to {{ $to }} of {{ $total }} results</span>
+                            </div>
+
+                            <div>
+                                {{ $locations->withQueryString()->links() }}
+                            </div>
+                            </div>
+
+                            <script>
+                            const s = document.getElementById('pendingPerPageSelect');
+                            const f = document.getElementById('pendingPerPageForm');
+                            if (s && f) s.addEventListener('change', () => f.submit());
+                            </script>
+
                     </form>    
                 </div>
             @endif

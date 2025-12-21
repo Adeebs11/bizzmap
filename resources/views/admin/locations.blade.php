@@ -232,11 +232,57 @@
                     </tbody>
                 </table>
             </div>
-                  <div class="mt-3">
-        {{ $locations->links() }}
-      </div>
+                @php
+                $from = $locations->firstItem() ?? 0;
+                $to   = $locations->lastItem() ?? 0;
+                $total = $locations->total();
+                @endphp
 
+                <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap gap-2">
+                {{-- kiri: rows per page + showing --}}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted">Rows per page</span>
+
+                    <form id="perPageForm" method="GET" action="{{ url()->current() }}" class="d-inline">
+                    {{-- pertahankan semua query lain --}}
+                    @foreach(request()->except('per_page', 'page') as $k => $v)
+                        @if(is_array($v))
+                        @foreach($v as $vv)
+                            <input type="hidden" name="{{ $k }}[]" value="{{ $vv }}">
+                        @endforeach
+                        @else
+                        <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                        @endif
+                    @endforeach
+
+                    <select name="per_page" id="perPageSelect" class="form-select form-select-sm" style="width:90px">
+                        <option value="10"  {{ ($perPage ?? 10) == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25"  {{ ($perPage ?? 10) == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50"  {{ ($perPage ?? 10) == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ ($perPage ?? 10) == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                    </form>
+
+                    <span class="text-muted">Showing {{ $from }} to {{ $to }} of {{ $total }} results</span>
+                </div>
+
+                {{-- kanan: pagination --}}
+                <div>
+                    {{ $locations->withQueryString()->links() }}
+                </div>
+                </div>
         @endif
     </div>
 </div>
+
+
+<script>
+  const perPageSelect = document.getElementById('perPageSelect');
+  const perPageForm = document.getElementById('perPageForm');
+
+  if (perPageSelect && perPageForm) {
+    perPageSelect.addEventListener('change', () => perPageForm.submit());
+  }
+</script>
+
 @endsection
