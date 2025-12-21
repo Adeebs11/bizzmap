@@ -3,9 +3,12 @@
 @section('title', 'Data Customer & Non-Cust - BizzMap')
 
 @section('content')
+
+
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h3 class="mb-0">Data Customer & Non-Cust</h3>
 </div>
+
 
 <form class="d-flex flex-wrap align-items-center gap-2 mb-3"
       method="GET" action="{{ route('admin.locations') }}">
@@ -71,24 +74,127 @@
             <p class="mb-0 text-muted">Belum ada data approved.</p>
         @else
             <div class="table-responsive">
-                <table class="table table-striped align-middle">
+
+                @php
+                    $isSorted = fn($col) => ($sortBy ?? 'created_at') === $col;
+
+                    $nextDir = function ($col) use ($sortBy, $sortDir) {
+                        if (($sortBy ?? null) === $col) {
+                            return ($sortDir ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                        }
+                        return 'asc'; // default klik pertama
+                    };
+
+                    $sortUrl = function ($col) {
+                        return request()->fullUrlWithQuery([
+                            'sort_by' => $col,
+                            'sort_dir' => request('sort_dir') === 'asc' ? 'desc' : 'asc',
+                        ]);
+                    };
+                @endphp
+
+                <table class="table table-striped align-middle table-fixed">
                     <thead>
                         <tr>
-                            <th>Nama</th>
-                            <th>Alamat</th>
-                            <th>Koordinat</th>
-                            <th>Tipe</th>
-                            <th>Segmen</th>
-                            <th>Dibuat</th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'name',
+                                    'sort_dir' => ($sortBy === 'name' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                Nama
+                                @if($sortBy === 'name')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'address',
+                                    'sort_dir' => ($sortBy === 'address' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                Alamat
+                                @if($sortBy === 'address')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'coordinates',
+                                    'sort_dir' => ($sortBy === 'coordinates' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                Koordinat
+                                @if($sortBy === 'coordinates')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'type',
+                                    'sort_dir' => ($sortBy === 'type' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+
+                                Tipe
+
+                                @if($sortBy === 'type')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'segment',
+                                    'sort_dir' => ($sortBy === 'segment' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+
+                                Segmen
+
+                                @if($sortBy === 'segment')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
+                            <th>
+                            <a href="{{ request()->fullUrlWithQuery([
+                                    'sort_by' => 'created_at',
+                                    'sort_dir' => ($sortBy === 'created_at' && $sortDir === 'asc') ? 'desc' : 'asc'
+                                ]) }}"
+                                class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+
+                                Dibuat
+
+                                @if($sortBy === 'created_at')
+                                <i class="bi {{ $sortDir === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                            </th>
+
                             <th style="width:170px;" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($locations as $loc)
                             <tr>
-                                <td>{{ $loc->name }}</td>
                                 <td>
-                                <div class="text-truncate" style="max-width: 360px;" title="{{ $loc->address }}">
+                                <div class="text-truncate" style="max-width: 200px;" title="{{ $loc->name }}">
+                                    {{ $loc->name }}
+                                </div>
+                                </td>
+
+                                <td>
+                                <div class="text-truncate" style="max-width: 280px;" title="{{ $loc->address }}">
                                     {{ $loc->address }}
                                 </div>
                                 </td>
@@ -100,32 +206,36 @@
                                     </span>
                                 </td>
                                 <td>{{ $loc->segment }}</td>
-                                <td>{{ $loc->created_at?->format('Y-m-d') }}</td>
 
-<td class="text-center text-nowrap">
-  <div class="d-inline-flex gap-2">
-    <a href="{{ route('admin.locations.edit', $loc->id) }}" class="btn btn-success btn-sm">
-      Edit
-    </a>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 280px;" title="{{ $loc->created_at?->format('Y-m-d') }}">
+                                    {{ $loc->created_at?->format('Y-m-d') }}
+                                </td>
 
-    <form method="POST" action="{{ route('admin.locations.delete', $loc->id) }}"
-      onsubmit="return confirm('Hapus data ini?');">
-      @csrf
-      @method('DELETE')
-      <button class="btn btn-danger btn-sm" type="submit">Delete</button>
-    </form>
-  </div>
-</td>
+                                <td class="text-center text-nowrap">
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{{ route('admin.locations.edit', $loc->id) }}" class="btn btn-success btn-sm">
+                                    Edit
+                                    </a>
+
+                                    <form method="POST" action="{{ route('admin.locations.delete', $loc->id) }}"
+                                    onsubmit="return confirm('Hapus data ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                                </td>
                             </tr>
                             
                         @endforeach
                     </tbody>
                 </table>
             </div>
+                  <div class="mt-3">
+        {{ $locations->links() }}
+      </div>
 
-            <div class="mt-3">
-                {{ $locations->links() }}
-            </div>
         @endif
     </div>
 </div>

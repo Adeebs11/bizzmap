@@ -49,11 +49,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
-    Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole'])
-    ->name('admin.users.role');
+    Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole'])->name('admin.users.role');
     Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    
     Route::post('/pending/{id}/reject', [AdminController::class, 'reject'])->name('admin.reject');
+    Route::post('/admin/pending/bulk-approve', [AdminController::class, 'bulkApprove'])->name('admin.pending.bulkApprove');
+    Route::post('/admin/pending/bulk-reject', [AdminController::class, 'bulkReject'])->name('admin.pending.bulkReject');
+
     Route::get('/locations', [AdminController::class, 'locations'])->name('admin.locations');
     Route::get('/locations/{id}/edit', [AdminController::class, 'editLocation'])->name('admin.locations.edit');
     Route::put('/locations/{id}', [AdminController::class, 'updateLocation'])->name('admin.locations.update');

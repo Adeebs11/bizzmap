@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\DB;
 use App\Models\Location;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -172,7 +172,7 @@ class AdminController extends Controller
             $sortDir = $request->query('sort_dir', 'desc');     // asc / desc
 
             // whitelist untuk keamanan
-            $allowedSortBy = ['created_at', 'type', 'segment'];
+            $allowedSortBy = ['created_at', 'type', 'segment', 'name', 'address', 'coordinates'];
             if (!in_array($sortBy, $allowedSortBy, true)) $sortBy = 'created_at';
 
             $allowedSortDir = ['asc', 'desc'];
@@ -201,7 +201,14 @@ class AdminController extends Controller
             }
 
             // sorting
+            if ($sortBy === 'coordinates') {
+            // urutkan latitude dulu, lalu longitude
+            $query->orderBy('latitude', $sortDir)
+                ->orderBy('longitude', $sortDir);
+            } else {
             $query->orderBy($sortBy, $sortDir);
+}
+
 
             $locations = $query->paginate(10)->withQueryString();
 
@@ -246,5 +253,42 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Data lokasi berhasil dihapus.');
     }
+
+        public function bulkApprove(Request $request)
+    {
+        $validated = $request->validate([
+            'selected' => 'required|array|min:1',
+            'selected.*' => 'integer',
+        ]);
+
+        $ids = $validated['selected'];
+
+        $updated = DB::transaction(function () use ($ids) {
+            return Location::whereIn('id', $ids)
+                ->where('status', 'pending')
+                ->update(['status' => 'approved']);
+        });
+
+        return redirect()->back()->with('success', "{$updated} data berhasil di-approve.");
+    }
+
+    public function bulkReject(Request $request)
+    {
+        $validated = $request->validate([
+            'selected' => 'required|array|min:1',
+            'selected.*' => 'integer',
+        ]);
+
+        $ids = $validated['selected'];
+
+        $deleted = DB::transaction(function () use ($ids) {
+            return Location::whereIn('id', $ids)
+                ->where('status', 'pending')
+                ->delete();
+        });
+
+        return redirect()->back()->with('success', "{$deleted} data berhasil di-reject (dihapus).");
+    }
+
 
 }
