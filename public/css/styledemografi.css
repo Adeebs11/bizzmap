@@ -157,3 +157,81 @@ canvas {
 .btn-light i {
     margin-right: 5px;
 }
+
+.chart-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    height: 100%;
+}
+
+.chart-lg {
+    height: 420px; /* chart 1 lebih besar */
+}
+
+.chart-md {
+    height: 320px; /* chart bawah lebih rapat */
+}
+
+/* ===== WRAPPER BADGE SEGMEN ===== */
+.segment-badge-wrapper {
+    margin-top: 30px;   /* jarak dari info box merah */
+    margin-bottom: 20px;
+}
+
+/* ===== ALERT BADGE ===== */
+.segment-alert {
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== ICON ===== */
+.segment-icon {
+    font-size: 25px;
+}
+
+/* ===== BADGE SEGMENT ===== */
+.segment-badge {
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 5px;
+    letter-spacing: 1px;
+}
+
+/* ===============================
+   SEGMENT DOMINANT - COLOR THEME
+   =============================== */
+
+/* ===== CUSTOMER (BIRU) ===== */
+.segment-customer {
+    background-color: #e7f1ff;
+    border: 1px solid #b6d4fe;
+    color: #084298;
+}
+
+.segment-customer .segment-icon {
+    color: #0d6efd;
+}
+
+.segment-customer .segment-badge {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+/* ===== NON CUSTOMER (PINK) ===== */
+.segment-noncustomer {
+    background-color: #fde8ec;
+    border: 1px solid #f5c2c7;
+    color: #842029;
+}
+
+.segment-noncustomer .segment-icon {
+    color: #ff4d6d;
+}
+
+.segment-noncustomer .segment-badge {
+    background-color: #ff002f;
+    color: #ffffff;
+}

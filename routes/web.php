@@ -23,9 +23,6 @@ Route::get('/geo', function () {
     return view('geo');
 });
 
-Route::get('/demografi', function () {
-    return view('demografi');
-});
 
 Route::get('/landing', function () {
     return view('landing');
@@ -65,6 +62,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/demografi', [LocationController::class, 'demografi'])->name('demografi');
     Route::get('/locations/approved', [LocationController::class, 'approved'])->name('locations.approved');
     Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');
     Route::post('/locations/import', [LocationController::class, 'import'])->name('locations.import');
