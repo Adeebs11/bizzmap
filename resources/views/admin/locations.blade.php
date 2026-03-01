@@ -70,9 +70,23 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        @if($locations->isEmpty())
-            <p class="mb-0 text-muted">Belum ada data approved.</p>
-        @else
+            @if($locations->isEmpty())
+            <div class="alert alert-info mb-0">
+                <div class="fw-semibold">Belum ada data approved.</div>
+                <div class="small">
+                Data yang sudah di-approve akan tampil di sini dan otomatis muncul di halaman peta.
+                </div>
+
+                <div class="mt-3 d-flex gap-2 flex-wrap">
+                <a href="{{ route('admin.pending') }}" class="btn btn-sm btn-primary">
+                    Lihat Data Pending
+                </a>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                    Kembali ke Dashboard
+                </a>
+                </div>
+            </div>
+            @else
             <div class="table-responsive">
 
                 @php

@@ -32,7 +32,17 @@
     <div class="card shadow-sm">
         <div class="card-body">
             @if($locations->isEmpty())
-                <p class="mb-0 text-muted">Belum ada data pending.</p>
+            <div class="alert alert-success mb-0">
+                <div class="fw-semibold">Tidak ada data pending</div>
+                <div class="small">
+                Semua data yang masuk sudah ditindaklanjuti, atau belum ada user yang mengirim data baru.
+                </div>
+                <div class="mt-3">
+                <a href="{{ route('admin.locations') }}" class="btn btn-sm btn-outline-primary">
+                    Lihat Data Approved
+                </a>
+                </div>
+            </div>
             @else
                 <div class="table-responsive">
                     <form id="bulkForm" method="POST">

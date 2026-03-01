@@ -36,6 +36,14 @@
             <button id="btn-non-customer" class="btn btn-secondary">Non-Customer</button>
         </div>
 
+        <div id="empty-analytics-alert" class="alert alert-info d-none">
+        <div class="fw-semibold">Belum ada data untuk dianalisis.</div>
+        <div class="small">
+            Jika data sudah di-approve tapi angka masih kosong, buka halaman <b>Map</b> terlebih dahulu
+            agar data tersinkron ke perangkat (localStorage).
+        </div>
+        </div>
+
         <div id="customer-segment" class="row">
             <!-- Indibiz Segments -->
             <div class="col-md-6 mb-4">
@@ -243,13 +251,58 @@
     </div>
 
     <script>
-    const btnCustomer = document.getElementById('btn-customer');
-    const btnNonCustomer = document.getElementById('btn-non-customer');
+    function setCountClickable(el, clickable) {
+    if (!el) return;
+    el.style.textDecoration = clickable ? "underline" : "none";
+    el.style.cursor = clickable ? "pointer" : "default";
+    }
 
-    const customerSection = document.getElementById('customer-segment');
-    const nonCustomerSection = document.getElementById('non-customer-segment');
+    // ambil elemen tombol & section (ID harus sama dengan HTML)
+const btnCustomer = document.getElementById("btn-customer");
+const btnNonCustomer = document.getElementById("btn-non-customer");
+const customerSection = document.getElementById("customer-segment");
+const nonCustomerSection = document.getElementById("non-customer-segment");
 
-    btnCustomer.addEventListener('click', () => {
+const alertEl = document.getElementById("empty-analytics-alert");
+
+// disable link download kalau count = 0, dan tampilkan alert kalau total = 0
+function applyAnalyticsEmptyState() {
+    let total = 0;
+
+    document.querySelectorAll(".count-link").forEach((a) => {
+        const n = parseInt(a.textContent.trim(), 10) || 0;
+        total += n;
+
+        if (n === 0) {
+            // non-aktifkan link (tidak bisa diklik)
+            a.style.textDecoration = "none";
+            a.style.cursor = "default";
+            a.style.pointerEvents = "none";
+            a.classList.add("text-muted");
+            a.setAttribute("aria-disabled", "true");
+            a.setAttribute("tabindex", "-1");
+        } else {
+            // pastikan link aktif
+            a.style.textDecoration = "underline";
+            a.style.cursor = "pointer";
+            a.style.pointerEvents = "auto";
+            a.classList.remove("text-muted");
+            a.removeAttribute("aria-disabled");
+            a.removeAttribute("tabindex");
+        }
+    });
+
+    if (total === 0) {
+        alertEl?.classList.remove("d-none");
+    } else {
+        alertEl?.classList.add("d-none");
+    }
+}
+
+// jalankan saat halaman dibuka
+applyAnalyticsEmptyState();
+
+    btnCustomer.addEventListener('click', function() {
         customerSection.style.display = 'flex';
         customerSection.style.flexWrap = 'wrap';
         nonCustomerSection.style.display = 'none';
@@ -260,7 +313,7 @@
         btnNonCustomer.classList.remove('btn-primary');
     });
 
-    btnNonCustomer.addEventListener('click', () => {
+    btnNonCustomer.addEventListener('click', function() {
         nonCustomerSection.style.display = 'flex';
         nonCustomerSection.style.flexWrap = 'wrap';
         customerSection.style.display = 'none';

@@ -23,7 +23,17 @@
     <div class="card shadow-sm">
         <div class="card-body">
             @if($users->isEmpty())
-                <p class="mb-0 text-muted">Belum ada user terdaftar.</p>
+            <div class="alert alert-warning mb-0">
+                <div class="fw-semibold">Belum ada user terdaftar.</div>
+                <div class="small">
+                Tambahkan akun untuk SA/AR agar bisa login dan mengirim data pelanggan/non-pelanggan.
+                </div>
+                <div class="mt-3">
+                <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary">
+                    + Add New
+                </a>
+                </div>
+            </div>
             @else
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">

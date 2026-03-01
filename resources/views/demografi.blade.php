@@ -29,6 +29,21 @@
                 </a>
             </div>
             <h1 class="text-center mb-5">DEMOGRAFI</h1>
+
+            @php
+            $totalAll = (int)$customerTotal + (int)$nonCustomerTotal;
+            @endphp
+
+            @if($totalAll === 0)
+            <div class="alert alert-info">
+                <div class="fw-semibold">Data demografi belum tersedia.</div>
+                <div class="small">
+                Belum ada data lokasi yang berstatus <b>approved</b>.
+                Silakan input data melalui halaman Map, lalu tunggu verifikasi admin.
+                </div>
+            </div>
+            @endif
+
             <div class="row text-center mb-4">
                 <div class="col-md-3 info-box">
                     <i class="fas fa-map-marker-alt"></i>
@@ -83,21 +98,21 @@
                     </div>
                 </div>
 
-
-                <div class="row gx-3 gy-2 mb-3">
+        @if($totalAll > 0)
+            <div class="row gx-3 gy-2 mb-3">
                 <div class="col-lg-6 mx-auto">
                     <div class="chart-card chart-lg">
                     <canvas id="businessTypeChart"></canvas>
                     </div>
                 </div>
-                </div>
+            </div>
 
-                <div class="row gx-3 gy-2">
+            <div class="row gx-3 gy-2">
                 <div class="col-lg-6">
                     <div class="chart-card chart-md">
                     <canvas id="segmentCustomerChart"></canvas>
                     </div>
-                </div>
+            </div>
 
                 <div class="col-lg-6">
                     <div class="chart-card chart-md">
@@ -105,9 +120,10 @@
                     </div>
                 </div>
                 </div>
+                @endif
+        </div>
 
-    </div>
-
+    @if($totalAll > 0)
     <script>
         const byType = @json($byType);
         const segmentCustomer = @json($segmentCustomer);
@@ -201,6 +217,7 @@
             }
         });
         </script>
+@endif
 
 </body>
 </html>
