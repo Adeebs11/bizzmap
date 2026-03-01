@@ -310,9 +310,93 @@ class LocationController extends Controller
             'dominantCustomerSegment' => $dominantCustomerSegment,
             'dominantNonCustomerSegment' => $dominantNonCustomerSegment,
         ]);
-
-
     }
+
+        public function analytics()
+    {
+        // Total data approved
+        $totalCustomer = DB::table('locations')
+            ->where('status', 'approved')
+            ->where('type', 'customer')
+            ->count();
+
+        $totalNonCustomer = DB::table('locations')
+            ->where('status', 'approved')
+            ->where('type', 'non_customer')
+            ->count();
+
+        $totalAll = $totalCustomer + $totalNonCustomer;
+
+        // Analisis per segmen & type
+        $segmentAnalytics = DB::table('locations')
+            ->select(
+                'segment',
+                DB::raw("SUM(CASE WHEN type = 'customer' THEN 1 ELSE 0 END) as customer"),
+                DB::raw("SUM(CASE WHEN type = 'non_customer' THEN 1 ELSE 0 END) as non_customer")
+            )
+            ->where('status', 'approved')
+            ->groupBy('segment')
+            ->orderBy('segment')
+            ->get();
+
+        return view('analytics', compact(
+            'totalCustomer',
+            'totalNonCustomer',
+            'totalAll',
+            'segmentAnalytics'
+        ));
+    }
+
+    public function downloadAnalyticsSegment(Request $request)
+{
+    $type = $request->query('type');       // customer / non_customer
+    $segment = $request->query('segment'); // shop/school/hotel/dll
+
+    // Validasi sederhana (biar aman)
+    if (!in_array($type, ['customer', 'non_customer'], true)) {
+        abort(400, 'Invalid type.');
+    }
+
+    if (!$segment) {
+        abort(400, 'Segment is required.');
+    }
+
+    // Ambil data approved saja
+    $rows = Location::query()
+        ->select('name', 'address', 'latitude', 'longitude', 'type', 'segment', 'created_at')
+        ->where('status', 'approved')
+        ->where('type', $type)
+        ->where('segment', $segment)
+        ->orderByDesc('created_at')
+        ->get();
+
+    $filename = "analytics_{$type}_{$segment}_" . now()->format('Ymd_His') . ".csv";
+
+    return response()->streamDownload(function () use ($rows) {
+        $handle = fopen('php://output', 'w');
+
+        // Header CSV
+        fputcsv($handle, ['name', 'address', 'latitude', 'longitude', 'type', 'segment', 'created_at']);
+
+        // Isi data
+        foreach ($rows as $r) {
+            fputcsv($handle, [
+                $r->name,
+                $r->address,
+                $r->latitude,
+                $r->longitude,
+                $r->type,
+                $r->segment,
+                optional($r->created_at)->toDateTimeString(),
+            ]);
+        }
+
+        fclose($handle);
+    }, $filename, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+    ]);
+}
+
 
 
 }

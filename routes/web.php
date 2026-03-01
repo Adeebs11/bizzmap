@@ -10,10 +10,6 @@ Route::get("/", function () {
     return view('landing');
 });
 
-// Routes untuk halaman statis
-Route::get('/analytics', function () {
-    return view('analytics');
-});
 
 Route::get('/menu', function () {
     return view('menu');
@@ -66,4 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/locations/approved', [LocationController::class, 'approved'])->name('locations.approved');
     Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');
     Route::post('/locations/import', [LocationController::class, 'import'])->name('locations.import');
+    Route::get('/analytics', [LocationController::class, 'analytics'])->middleware('auth')->name('analytics');
+    Route::get('/analytics/download', [LocationController::class, 'downloadAnalyticsSegment'])->name('analytics.download');
+
 });
