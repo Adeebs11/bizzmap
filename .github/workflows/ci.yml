@@ -43,7 +43,6 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan config:clear
-          php artisan cache:clear
 
       - name: Wait for MySQL to be ready
         run: |
