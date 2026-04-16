@@ -39,7 +39,7 @@
                 <div class="fw-semibold">Data demografi belum tersedia.</div>
                 <div class="small">
                 Belum ada data lokasi yang berstatus <b>approved</b>.
-                Silakan input data melalui halaman Map, lalu tunggu verifikasi admin.
+                Silakan input data melalui halaman Peta, lalu tunggu verifikasi admin.
                 </div>
             </div>
             @endif
