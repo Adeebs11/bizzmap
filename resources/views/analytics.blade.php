@@ -32,7 +32,7 @@
 
         <!-- Switch between Customer and Non-Customer -->
         <div class="d-flex justify-content-center mb-4">
-            <button id="btn-customer" class="btn btn-primary me-2">Customer Indibiz</button>
+            <button id="btn-customer" class="btn btn-primary me-2">Customer</button>
             <button id="btn-non-customer" class="btn btn-secondary">Non-Customer</button>
         </div>
 
