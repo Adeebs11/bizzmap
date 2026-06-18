@@ -13,7 +13,7 @@ class LocationController extends Controller
     public function approved()
     {
         $locations = Location::where('status', 'approved')
-            ->select('id','name','address','latitude','longitude','type','segment')
+            ->select('id','name','owner_name','phone','business_detail','omset','paket_langganan','address','latitude','longitude','type','segment')
             ->latest()
             ->get();
 
@@ -24,23 +24,33 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:150',
-            'address' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'type' => 'required|in:customer,non_customer',
-            'segment' => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
+            'name'             => 'required|string|max:150',
+            'owner_name'       => 'nullable|string|max:100',
+            'phone'            => 'nullable|string|max:20',
+            'business_detail'  => 'nullable|string|max:200',
+            'omset'            => 'nullable|in:di_bawah_5jt,5jt_20jt,20jt_50jt,50jt_100jt,di_atas_100jt',
+            'paket_langganan'  => 'nullable|string|max:100',
+            'address'          => 'required|string',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric',
+            'type'             => 'required|in:customer,non_customer',
+            'segment'          => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
         ]);
 
         $location = Location::create([
-            'user_id' => $request->user()->id,
-            'name' => $validated['name'],
-            'address' => $validated['address'],
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'type' => $validated['type'],
-            'segment' => $validated['segment'],
-            'status' => 'pending',
+            'user_id'          => $request->user()->id,
+            'name'             => $validated['name'],
+            'owner_name'       => $validated['owner_name'] ?? null,
+            'phone'            => $validated['phone'] ?? null,
+            'business_detail'  => $validated['business_detail'] ?? null,
+            'omset'            => $validated['omset'] ?? null,
+            'paket_langganan'  => $validated['paket_langganan'] ?? null,
+            'address'          => $validated['address'],
+            'latitude'         => $validated['latitude'],
+            'longitude'        => $validated['longitude'],
+            'type'             => $validated['type'],
+            'segment'          => $validated['segment'],
+            'status'           => 'pending',
         ]);
 
         return response()->json([
