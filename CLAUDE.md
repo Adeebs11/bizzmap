@@ -152,3 +152,25 @@ php artisan tinker
 # Clear cache
 php artisan config:clear && php artisan cache:clear
 ```
+
+## Aturan Penggunaan Plugin Leaflet
+Jika ada fitur GIS/peta baru yang diperlukan dan belum ada
+di kode saat ini, WAJIB cek terlebih dahulu:
+https://leafletjs.com/plugins.html
+
+Prioritaskan plugin yang:
+- Sudah teruji (banyak bintang GitHub)
+- Bisa di-load via CDN (tidak perlu npm build)
+- Kompatibel dengan Leaflet versi 1.9.4 (yang sudah terpasang)
+
+Plugin yang SUDAH direncanakan untuk diinstall:
+- Leaflet.markercluster (clustering marker)
+- Leaflet.heat (heatmap)
+- Leaflet.fullscreen (mode fullscreen)
+- Leaflet.Control.Geocoder (cari alamat)
+- Leaflet.MiniMap (peta mini)
+- leaflet-measure (ukur jarak)
+- leaflet-easyPrint (export peta sebagai gambar)
+
+Semua plugin load via CDN di <head> geo.blade.php,
+JANGAN pakai npm install karena proyek ini tidak pakai build tool.
