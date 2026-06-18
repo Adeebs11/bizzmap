@@ -327,6 +327,55 @@
       line-height: 1.4;
     }
     .toast-dismiss { flex-shrink: 0; filter: invert(1) brightness(0.3); }
+
+    /* ========================
+       Kecamatan Layer (GeoJSON)
+       ======================== */
+    .kecamatan-label {
+      background:     transparent !important;
+      border:         none !important;
+      box-shadow:     none !important;
+      font-family:    'Poppins', sans-serif !important;
+      font-size:      10px !important;
+      font-weight:    700 !important;
+      color:          #222222 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.4px !important;
+      white-space:    nowrap !important;
+      pointer-events: none !important;
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95) !important;
+    }
+    /* Marker & popup selalu di atas layer kecamatan */
+    .leaflet-marker-pane  { z-index: 620 !important; }
+    .leaflet-popup-pane   { z-index: 700 !important; }
+    .leaflet-tooltip-pane { z-index: 650 !important; }
+
+    /* Toggle button kecamatan */
+    #btnKecamatan {
+      padding: 5px 12px;
+      border: 1.5px solid #C02016;
+      border-radius: 16px;
+      background: white;
+      color: #C02016;
+      font-family: 'Poppins', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: absolute;
+      bottom: 60px;
+      right: 60px;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #btnKecamatan:hover { background: #FFF0EF; }
   </style>
 </head>
 
@@ -343,6 +392,9 @@
       </label>
       <button id="download-xlsx" class="download-button" title="Download data">
         <i class="fa-solid fa-file-arrow-down"></i>
+      </button>
+      <button id="btnKecamatan" title="Tampilkan/sembunyikan batas kecamatan">
+        🗺️ Batas Kecamatan
       </button>
     </div>
 
@@ -559,6 +611,129 @@
     }).addTo(map);
 
     var markerGroup = L.layerGroup().addTo(map);
+
+    /* ===================================
+       Layer Batas Kecamatan (GeoJSON)
+       =================================== */
+    var warnaKecamatan = {
+      'DANAUTELUK':    '#E67E22',
+      'JALUTUNG':      '#27AE60',
+      'JAMBI SELATAN': '#8E44AD',
+      'JAMBI TIMUR':   '#F39C12',
+      'KOTABARU':      '#BDC3C7',
+      'PASAR JAMBI':   '#3498DB',
+      'PELAYANGAN':    '#1ABC9C',
+      'TELANAIPURA':   '#E74C3C'
+    };
+
+    var namaRapi = {
+      'DANAUTELUK':    'Danau Teluk',
+      'JALUTUNG':      'Jelutung',
+      'JAMBI SELATAN': 'Jambi Selatan',
+      'JAMBI TIMUR':   'Jambi Timur',
+      'KOTABARU':      'Kota Baru',
+      'PASAR JAMBI':   'Pasar Jambi',
+      'PELAYANGAN':    'Pelayangan',
+      'TELANAIPURA':   'Telanaipura'
+    };
+
+    var kecamatanGeoJson = null;
+    var kecamatanVisible = true;
+
+    function initKecamatan() {
+      fetch('{{ asset("geojson/kecamatan-kota-jambi.json") }}')
+        .then(function (res) {
+          if (!res.ok) throw new Error('File GeoJSON tidak ditemukan');
+          return res.json();
+        })
+        .then(function (data) {
+          kecamatanGeoJson = L.geoJSON(data, {
+
+            style: function (feature) {
+              var kode = (feature.properties.NAMOBJ || '').toUpperCase().trim();
+              return {
+                color:        '#444444',
+                weight:       2,
+                opacity:      0.9,
+                fillColor:    warnaKecamatan[kode] || '#CCCCCC',
+                fillOpacity:  0.20,
+                smoothFactor: 1.5
+              };
+            },
+
+            onEachFeature: function (feature, layer) {
+              var kode  = (feature.properties.NAMOBJ || '').toUpperCase().trim();
+              var nama  = namaRapi[kode] || feature.properties.NAMOBJ;
+              var warna = warnaKecamatan[kode] || '#CCCCCC';
+
+              layer.bindTooltip(nama, {
+                permanent:  true,
+                direction:  'center',
+                className:  'kecamatan-label'
+              });
+
+              layer.on('mouseover', function () {
+                layer.setStyle({ fillOpacity: 0.40, weight: 2.5, color: '#C02016' });
+                layer.bringToFront();
+                if (markerGroup) markerGroup.bringToFront();
+              });
+
+              layer.on('mouseout', function () {
+                kecamatanGeoJson.resetStyle(layer);
+                layer.bringToBack();
+              });
+
+              layer.on('click', function (e) {
+                L.popup({ maxWidth: 220 })
+                  .setLatLng(e.latlng)
+                  .setContent(
+                    '<div style="font-family:Poppins;padding:6px 4px;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<div style="width:14px;height:14px;border-radius:4px;background:' + warna +
+                    ';flex-shrink:0;"></div>' +
+                    '<b style="font-size:13px;color:#111;">Kec. ' + nama + '</b>' +
+                    '</div>' +
+                    '<div style="color:#777;font-size:11px;margin-top:4px;padding-left:22px;">' +
+                    'Kota Jambi · Provinsi Jambi</div>' +
+                    '</div>'
+                  )
+                  .openOn(map);
+                L.DomEvent.stopPropagation(e);
+              });
+            }
+
+          }).addTo(map);
+
+          kecamatanGeoJson.bringToBack();
+          console.log('Kecamatan berhasil dimuat:', data.features.length, 'wilayah');
+        })
+        .catch(function (err) {
+          console.warn('Gagal load kecamatan:', err.message);
+        });
+    }
+
+    function toggleKecamatan() {
+      var btn = document.getElementById('btnKecamatan');
+      if (!kecamatanGeoJson) return;
+      if (kecamatanVisible) {
+        map.removeLayer(kecamatanGeoJson);
+        btn.style.background  = '#f0f0f0';
+        btn.style.color       = '#999';
+        btn.style.borderColor = '#ddd';
+        kecamatanVisible = false;
+      } else {
+        kecamatanGeoJson.addTo(map);
+        kecamatanGeoJson.bringToBack();
+        btn.style.background  = 'white';
+        btn.style.color       = '#C02016';
+        btn.style.borderColor = '#C02016';
+        kecamatanVisible = true;
+      }
+    }
+
+    document.getElementById('btnKecamatan').addEventListener('click', toggleKecamatan);
+
+    initKecamatan();
 
     /* ========================
        Type / Segment Mapping
