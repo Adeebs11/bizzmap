@@ -241,12 +241,17 @@ class AdminController extends Controller
         $location = \App\Models\Location::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:150',
-            'address' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'type' => 'required|in:customer,non_customer',
-            'segment' => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
+            'name'             => 'required|string|max:150',
+            'address'          => 'required|string',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric',
+            'type'             => 'required|in:customer,non_customer',
+            'segment'          => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
+            'owner_name'       => 'nullable|string|max:100',
+            'phone'            => 'nullable|string|max:20',
+            'business_detail'  => 'nullable|string|max:200',
+            'omset'            => 'nullable|in:di_bawah_5jt,5jt_20jt,20jt_50jt,50jt_100jt,di_atas_100jt',
+            'paket_langganan'  => 'nullable|string|max:100',
         ]);
 
         $location->update($validated);
