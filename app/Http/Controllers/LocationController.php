@@ -538,6 +538,37 @@ class LocationController extends Controller
         $totalLokasi  = $customerTotal + $nonCustomerTotal;
         $totalPending = \App\Models\Location::where('status', 'pending')->count();
 
+        // P3B: Analisis detail — omset, paket, bidang bisnis
+        $omsetKeys = ['di_bawah_5jt', '5jt_20jt', '20jt_50jt', '50jt_100jt', 'di_atas_100jt'];
+        $byOmset = collect($omsetKeys)->map(function ($key) {
+            return [
+                'key'          => $key,
+                'customer'     => \App\Models\Location::where('status', 'approved')
+                                      ->where('type', 'customer')->where('omset', $key)->count(),
+                'non_customer' => \App\Models\Location::where('status', 'approved')
+                                      ->where('type', 'non_customer')->where('omset', $key)->count(),
+            ];
+        });
+
+        $byPaket = \App\Models\Location::where('status', 'approved')
+            ->where('type', 'customer')
+            ->whereNotNull('paket_langganan')
+            ->where('paket_langganan', '!=', '')
+            ->selectRaw('paket_langganan, COUNT(*) as total')
+            ->groupBy('paket_langganan')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        $byBidang = \App\Models\Location::where('status', 'approved')
+            ->whereNotNull('business_detail')
+            ->where('business_detail', '!=', '')
+            ->selectRaw('business_detail, COUNT(*) as total')
+            ->groupBy('business_detail')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
         return view('demografi', [
             'byType'                     => $byType,
             'customerTotal'              => $customerTotal,
@@ -555,6 +586,9 @@ class LocationController extends Controller
             'monthlyData'                => $monthlyData,
             'totalLokasi'                => $totalLokasi,
             'totalPending'               => $totalPending,
+            'byOmset'                    => $byOmset,
+            'byPaket'                    => $byPaket,
+            'byBidang'                   => $byBidang,
         ]);
     }
 
