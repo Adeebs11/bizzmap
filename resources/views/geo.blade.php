@@ -376,6 +376,17 @@
       gap: 5px;
     }
     #btnKecamatan:hover { background: #FFF0EF; }
+
+    /* Legenda peta — override body color:white */
+    #legendMap, #legendMap div, #legendMap span {
+      color: #222222;
+    }
+
+    /* Goals plan badge tetap inline-block, tidak melebar */
+    .goals-plan-item .info span {
+      width: auto;
+      display: inline-block;
+    }
   </style>
 </head>
 
@@ -402,24 +413,27 @@
            style="position:absolute;bottom:80px;left:60px;
                   z-index:1000;background:white;border-radius:10px;
                   padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);
-                  font-family:Poppins;font-size:11px;">
-        <div style="font-weight:600;color:#333;margin-bottom:5px;
+                  font-family:Poppins;font-size:11px;color:#222222;">
+        <div style="font-weight:600;color:#333333;margin-bottom:5px;
                     text-transform:uppercase;font-size:10px;
                     letter-spacing:0.4px;">🗺 Keterangan</div>
-        <div style="margin:3px 0;">
+        <div style="margin:3px 0;display:flex;align-items:center;">
           <span style="display:inline-block;width:10px;height:10px;
                        border-radius:50%;background:#3B82F6;
-                       margin-right:5px;"></span>Customer
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Customer</span>
         </div>
-        <div style="margin:3px 0;">
+        <div style="margin:3px 0;display:flex;align-items:center;">
           <span style="display:inline-block;width:10px;height:10px;
                        border-radius:50%;background:#C02016;
-                       margin-right:5px;"></span>Non-Customer
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Non-Customer</span>
         </div>
-        <div style="margin:3px 0;">
+        <div style="margin:3px 0;display:flex;align-items:center;">
           <span style="display:inline-block;width:10px;height:10px;
                        border-radius:50%;background:#F59E0B;
-                       margin-right:5px;"></span>Potensial ⭐
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Potensial ⭐</span>
         </div>
       </div>
     </div>
@@ -1388,8 +1402,9 @@
         }
 
         var potentialTag = markerData.is_potential
-          ? '<span style="background:#F59E0B;color:white;border-radius:4px;' +
-            'font-size:10px;padding:1px 6px;margin-left:6px;">⭐ Potensial</span>'
+          ? '<span style="display:inline-block;background:#F59E0B;color:white;' +
+            'border-radius:4px;font-size:10px;padding:2px 8px;margin-left:8px;' +
+            'font-weight:600;white-space:nowrap;vertical-align:middle;">⭐ Potensial</span>'
           : '';
 
         var iconColor = markerData.is_potential ? '#F59E0B' : '#ff0000';
@@ -1398,7 +1413,9 @@
           '<span class="marker-icon"><i class="fas fa-map-marker-alt" ' +
           'style="color:' + iconColor + ';"></i></span>' +
           '<div class="info">' +
-          '<div><strong>Nama</strong> ' + markerData.name + potentialTag + '</div>' +
+          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">' +
+          '<strong>Nama</strong> ' + markerData.name + potentialTag +
+          '</div>' +
           '<div><strong>Koordinat</strong> ' + markerData.latitude + ', ' + markerData.longitude + '</div>' +
           '<div><strong>Alamat</strong> ' + markerData.address + '</div>' +
           '</div>' +
