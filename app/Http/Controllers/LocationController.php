@@ -13,11 +13,33 @@ class LocationController extends Controller
     public function approved()
     {
         $locations = Location::where('status', 'approved')
-            ->select('id','name','owner_name','phone','business_detail','omset','paket_langganan','address','latitude','longitude','type','segment')
+            ->select('id','name','owner_name','phone','business_detail','omset','paket_langganan','address','latitude','longitude','type','segment','is_potential')
             ->latest()
             ->get();
 
         return response()->json($locations);
+    }
+
+    // PATCH: toggle flag potensial pada non-customer
+    public function togglePotential($id)
+    {
+        $location = Location::findOrFail($id);
+
+        if ($location->type !== 'non_customer') {
+            return response()->json([
+                'message' => 'Hanya non-customer yang bisa ditandai potensial'
+            ], 422);
+        }
+
+        $location->is_potential = !$location->is_potential;
+        $location->save();
+
+        return response()->json([
+            'is_potential' => $location->is_potential,
+            'message'      => $location->is_potential
+                ? 'Ditandai sebagai potensial'
+                : 'Tanda potensial dihapus'
+        ]);
     }
 
     // Private: hitung jarak Haversine & kembalikan kandidat duplikat

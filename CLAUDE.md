@@ -117,11 +117,14 @@ Leaflet.js. Dibuat sebagai skripsi dengan metode Extreme Programming.
         + tracking perubahan type (non_customer↔customer) via updateLocation
         History tampil sebagai timeline di modal Detail pending & locations
         change_type enum: 'status' | 'type'
-- [ ] P2B: Dashboard perubahan status bulanan
+- [x] P2B: Dashboard perubahan status bulanan
         (chart di halaman demografi: berapa non-customer → customer per bulan)
+        + tambah data churn + filter periode 1 Minggu / 1 Bulan / 6 Bulan
 
 ### 🟢 Prioritas 3 — Analisis Lebih Kaya
-- [ ] P3A: Flag non-customer potensial (field is_potential + marker warna beda)
+- [x] P3A: Flag non-customer potensial (field is_potential + marker warna beda)
+        migration is_potential, togglePotential API, yellowIcon, toggle button di
+        popup marker, Goals Plan tab terintegrasi sidebar, sort potensial di atas
 - [ ] P3B: Demografi multi-dimensi (filter omset, paket, bidang bisnis)
 - [ ] P3C: Auto-rekomendasi teks di halaman analytics berdasarkan jumlah data
 

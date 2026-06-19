@@ -303,25 +303,10 @@ h2 {
 .radio-group input[type="radio"] {
   margin-right: 20px; /* Add margin between radio button and label */
 }
+/* .goals-plan-button sekarang adalah tab inline di dalam sidebar */
 .goals-plan-button {
-  font-family: 'Poppins', sans-serif; 
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: #a01c14; /* Warna latar belakang tombol */
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 1rem;
-  font-weight: 600;
-  z-index: 1000;
-}
-
-.goals-plan-button:hover {
-  background-color: #6a130e;
 }
 
 .goals-plan {
@@ -330,13 +315,10 @@ h2 {
 
 .goals-plan-container {
   background-color: #ffffff;
-  padding: 15px;
-  overflow-y: auto; /* Enable vertical scroll */
-  border: 1px solid #a9a9a9;
-  border-radius: 2px;
-  max-height: 500px; /* Set a max height to enable scrolling */
-  margin-bottom: 60px;
-  
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 60vh;
+  margin-bottom: 12px;
 }
 
 .goals-plan-item {

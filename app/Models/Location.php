@@ -23,6 +23,11 @@ class Location extends Model
         'type',
         'segment',
         'status',
+        'is_potential',
+    ];
+
+    protected $casts = [
+        'is_potential' => 'boolean',
     ];
 
     public function histories()
