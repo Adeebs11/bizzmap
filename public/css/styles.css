@@ -323,12 +323,13 @@ h2 {
 
 .goals-plan-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
   color: #000000;
   margin-bottom: 10px;
   border-bottom: 1px solid #ddd;
   padding-bottom: 10px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .search-container {
@@ -344,20 +345,45 @@ h2 {
 }
 
 .goals-plan-item .marker-icon {
-  color: #ff0000;
-  margin-right: 20px;
   cursor: pointer;
-  font-size: 35px; /* Ukuran font yang lebih besar untuk memperbesar ikon */
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-
+/* Override global .info grid untuk goals-plan agar stacked vertikal */
 .goals-plan-item .info {
   flex: 1;
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.goals-plan-item .info > div {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.goals-plan-item .info strong {
+  min-width: 70px;
+  flex-shrink: 0;
+  color: #444;
+  font-weight: 600;
+}
+
+.goals-plan-item .info span {
+  width: auto;
+  display: inline;
+  word-break: break-word;
 }
 
 .goals-plan-item .actions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-shrink: 0;
+  gap: 6px;
 }
 
 .goals-plan-item .actions button {

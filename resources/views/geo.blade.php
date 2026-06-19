@@ -1412,14 +1412,22 @@
         item.innerHTML =
           '<span class="marker-icon"><i class="fas fa-map-marker-alt" ' +
           'style="color:' + iconColor + ';"></i></span>' +
-          '<div class="info">' +
-          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">' +
-          '<strong>Nama</strong> ' + markerData.name + potentialTag +
+          '<div class="info" style="flex:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Nama</strong>' +
+          '<span>' + markerData.name + '</span>' +
+          potentialTag +
           '</div>' +
-          '<div><strong>Koordinat</strong> ' + markerData.latitude + ', ' + markerData.longitude + '</div>' +
-          '<div><strong>Alamat</strong> ' + markerData.address + '</div>' +
+          '<div style="display:flex;gap:6px;margin-bottom:4px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Koordinat</strong>' +
+          '<span>' + markerData.latitude + ', ' + markerData.longitude + '</span>' +
           '</div>' +
-          '<div class="actions">' +
+          '<div style="display:flex;gap:6px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Alamat</strong>' +
+          '<span>' + markerData.address + '</span>' +
+          '</div>' +
+          '</div>' +
+          '<div class="actions" style="flex-shrink:0;align-self:flex-start;display:flex;gap:6px;">' +
           '<button class="btn-check"><i class="fas fa-check"></i></button>' +
           '<button class="btn-info"><i class="fas fa-info-circle"></i></button>' +
           '</div>';
