@@ -429,15 +429,110 @@ class LocationController extends Controller
             ->where('type', 'non_customer')
             ->count();
 
+        // Tren konversi 6 bulan terakhir
+        $months = collect(range(5, 0))->map(function ($i) {
+            return now()->subMonths($i);
+        });
+
+        $statusChanges = $months->map(function ($month) {
+            $konversi = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'non_customer')
+                ->where('new_type', 'customer')
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->count();
+
+            $churn = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'customer')
+                ->where('new_type', 'non_customer')
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->count();
+
+            return [
+                'label'    => $month->translatedFormat('M Y'),
+                'konversi' => $konversi,
+                'churn'    => $churn,
+            ];
+        });
+
+        $konversiBulanIni = \App\Models\LocationHistory::where('change_type', 'type')
+            ->where('old_type', 'non_customer')
+            ->where('new_type', 'customer')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $konversiBulanLalu = \App\Models\LocationHistory::where('change_type', 'type')
+            ->where('old_type', 'non_customer')
+            ->where('new_type', 'customer')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        $churnBulanIni = \App\Models\LocationHistory::where('change_type', 'type')
+            ->where('old_type', 'customer')
+            ->where('new_type', 'non_customer')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $churnBulanLalu = \App\Models\LocationHistory::where('change_type', 'type')
+            ->where('old_type', 'customer')
+            ->where('new_type', 'non_customer')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        // Data mingguan: 7 hari terakhir (per hari)
+        $weeklyData = collect(range(6, 0))->map(function ($i) {
+            $date = now()->subDays($i);
+            $konversi = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'non_customer')->where('new_type', 'customer')
+                ->whereDate('created_at', $date->toDateString())->count();
+            $churn = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'customer')->where('new_type', 'non_customer')
+                ->whereDate('created_at', $date->toDateString())->count();
+            return ['label' => $date->translatedFormat('d M'), 'konversi' => $konversi, 'churn' => $churn];
+        });
+
+        // Data bulanan: 4 minggu terakhir (per minggu)
+        $monthlyData = collect(range(3, 0))->map(function ($i) {
+            $end   = now()->subWeeks($i)->endOfDay();
+            $start = now()->subWeeks($i + 1)->addDay()->startOfDay();
+            $konversi = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'non_customer')->where('new_type', 'customer')
+                ->whereBetween('created_at', [$start, $end])->count();
+            $churn = \App\Models\LocationHistory::where('change_type', 'type')
+                ->where('old_type', 'customer')->where('new_type', 'non_customer')
+                ->whereBetween('created_at', [$start, $end])->count();
+            return [
+                'label'    => $start->translatedFormat('d M') . '–' . $end->translatedFormat('d M'),
+                'konversi' => $konversi,
+                'churn'    => $churn,
+            ];
+        });
+
+        $totalLokasi  = $customerTotal + $nonCustomerTotal;
+        $totalPending = \App\Models\Location::where('status', 'pending')->count();
 
         return view('demografi', [
-            'byType' => $byType,
-            'customerTotal' => $customerTotal,
-            'nonCustomerTotal' => $nonCustomerTotal,
-            'segmentCustomer' => $segmentCustomer,
-            'segmentNonCustomer' => $segmentNonCustomer,
-            'dominantCustomerSegment' => $dominantCustomerSegment,
+            'byType'                     => $byType,
+            'customerTotal'              => $customerTotal,
+            'nonCustomerTotal'           => $nonCustomerTotal,
+            'segmentCustomer'            => $segmentCustomer,
+            'segmentNonCustomer'         => $segmentNonCustomer,
+            'dominantCustomerSegment'    => $dominantCustomerSegment,
             'dominantNonCustomerSegment' => $dominantNonCustomerSegment,
+            'statusChanges'              => $statusChanges,
+            'konversiBulanIni'           => $konversiBulanIni,
+            'konversiBulanLalu'          => $konversiBulanLalu,
+            'churnBulanIni'              => $churnBulanIni,
+            'churnBulanLalu'             => $churnBulanLalu,
+            'weeklyData'                 => $weeklyData,
+            'monthlyData'                => $monthlyData,
+            'totalLokasi'                => $totalLokasi,
+            'totalPending'               => $totalPending,
         ]);
     }
 
