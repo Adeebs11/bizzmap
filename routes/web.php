@@ -60,6 +60,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/demografi', [LocationController::class, 'demografi'])->name('demografi');
     Route::get('/locations/approved', [LocationController::class, 'approved'])->name('locations.approved');
+    Route::get('/locations/check-duplicate', [LocationController::class, 'checkDuplicateEndpoint'])->name('locations.checkDuplicate');
     Route::post('/locations', [LocationController::class, 'store'])->name('locations.store');
     Route::post('/locations/import', [LocationController::class, 'import'])->name('locations.import');
     Route::get('/analytics', [LocationController::class, 'analytics'])->middleware('auth')->name('analytics');

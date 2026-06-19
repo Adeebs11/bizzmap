@@ -923,26 +923,32 @@
     });
 
     /* ========================
-       Save Data (POST to DB)
+       doSave — POST ke DB
        ======================== */
-    async function saveData(name, lat, lng, address, type, segmen, extra = {}) {
+    var dupCircle = null;
+
+    async function doSave(force = false) {
       try {
         const csrf    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const dbType  = mapUiTypeToDb(type);
-        const dbSeg   = mapUiSegmentToDb(type, segmen);
+        const typeEl  = document.querySelector('input[name="type"]:checked');
+        const type    = typeEl ? typeEl.value : null;
+        const segmen  = type === 'Indibiz'
+          ? document.getElementById('segmenIndibiz').value
+          : document.getElementById('segmenNonCustomer').value;
 
         const payload = {
-          name:            name,
-          address:         address,
-          latitude:        lat,
-          longitude:       lng,
-          type:            dbType,
-          segment:         dbSeg,
-          owner_name:      extra.owner_name      ?? null,
-          phone:           extra.phone           ?? null,
-          business_detail: extra.business_detail ?? null,
-          omset:           extra.omset           ?? null,
-          paket_langganan: extra.paket_langganan ?? null,
+          name:            document.getElementById('customerName').value?.trim(),
+          address:         document.getElementById('address').value?.trim(),
+          latitude:        parseFloat(document.getElementById('latitude').value),
+          longitude:       parseFloat(document.getElementById('longitude').value),
+          type:            mapUiTypeToDb(type),
+          segment:         mapUiSegmentToDb(type, segmen),
+          owner_name:      document.getElementById('ownerName').value?.trim()       || null,
+          phone:           document.getElementById('phone').value?.trim()           || null,
+          business_detail: document.getElementById('businessDetail').value?.trim()  || null,
+          omset:           document.getElementById('omset').value                   || null,
+          paket_langganan: document.getElementById('paketLangganan').value?.trim()  || null,
+          force:           force,
         };
 
         const res = await fetch("{{ route('locations.store') }}", {
@@ -954,6 +960,12 @@
           },
           body: JSON.stringify(payload)
         });
+
+        if (res.status === 409) {
+          const data = await res.json();
+          showDuplicateModal(data.duplicates);
+          return;
+        }
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -969,6 +981,91 @@
         console.error('Fetch error:', err);
         showSubmitPopup('Terjadi error koneksi. Coba refresh halaman.', 'danger');
       }
+    }
+
+    /* ========================
+       saveData — cek duplikat dulu
+       ======================== */
+    async function saveData(name, lat, lng, address, type, segmen, extra = {}) {
+      const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      try {
+        const params = new URLSearchParams({ name, latitude: lat, longitude: lng });
+        const checkRes = await fetch(
+          "{{ route('locations.checkDuplicate') }}?" + params,
+          { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf } }
+        );
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          if (checkData.duplicates && checkData.duplicates.length > 0) {
+            showDuplicateModal(checkData.duplicates);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Cek duplikat gagal, lanjut simpan:', e);
+      }
+
+      await doSave(false);
+    }
+
+    /* ========================
+       Modal Duplikat
+       ======================== */
+    function showDuplicateModal(duplicates) {
+      var typeLabel = function (t) {
+        return t === 'customer' ? 'Customer' : 'Non-Customer';
+      };
+      var typeBadgeStyle = function (t) {
+        return t === 'customer'
+          ? 'background:#DBEAFE;color:#1E40AF;'
+          : 'background:#FEE2E2;color:#991B1B;';
+      };
+
+      var listHtml = duplicates.slice(0, 3).map(function (d) {
+        return '<div style="border:1px solid #E5E7EB;border-radius:8px;' +
+          'padding:10px;margin-bottom:8px;">' +
+          '<div style="font-weight:600;font-size:13px;display:flex;' +
+          'align-items:center;gap:6px;">' + d.name +
+          '<span style="' + typeBadgeStyle(d.type) +
+          'padding:1px 7px;border-radius:4px;font-size:11px;font-weight:500;">' +
+          typeLabel(d.type) + '</span></div>' +
+          '<div style="color:#666;font-size:12px;margin-top:3px;">📍 ' + d.address + '</div>' +
+          '<div style="color:#F59E0B;font-size:12px;margin-top:2px;">📏 ± ' +
+          d.distance + ' meter dari lokasi Anda</div></div>';
+      }).join('');
+
+      if (duplicates.length > 3) {
+        listHtml += '<div style="text-align:center;font-size:12px;color:#9CA3AF;padding:4px 0;">dan ' +
+          (duplicates.length - 3) + ' data lainnya...</div>';
+      }
+
+      document.getElementById('duplicateList').innerHTML = listHtml;
+
+      if (dupCircle) map.removeLayer(dupCircle);
+      if (duplicates[0]) {
+        dupCircle = L.circle(
+          [duplicates[0].latitude, duplicates[0].longitude],
+          { radius: 50, color: '#F59E0B', fillColor: '#F59E0B',
+            fillOpacity: 0.15, weight: 2, dashArray: '6, 4' }
+        ).addTo(map);
+        map.panTo([duplicates[0].latitude, duplicates[0].longitude]);
+      }
+
+      new bootstrap.Modal(document.getElementById('modalDuplikat')).show();
+    }
+
+    function closeDuplicateModal() {
+      var modalEl = document.getElementById('modalDuplikat');
+      var modal   = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      if (dupCircle) { map.removeLayer(dupCircle); dupCircle = null; }
+    }
+
+    function confirmSaveDuplicate() {
+      closeDuplicateModal();
+      setSubmitLoading(true);
+      doSave(true).finally(function () { setSubmitLoading(false); });
     }
 
     /* ========================
@@ -1224,5 +1321,59 @@
       localStorage.removeItem('markers');
     }
   </script>
+
+  <!-- Modal Peringatan Duplikat -->
+  <div class="modal fade" id="modalDuplikat" tabindex="-1" aria-hidden="true"
+       data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content"
+           style="border-radius:12px;border:none;box-shadow:0 10px 40px rgba(0,0,0,0.15);">
+
+        <div class="modal-header"
+             style="background:#FFF3CD;border-radius:12px 12px 0 0;
+                    border-bottom:none;padding:20px 20px 12px;">
+          <div style="width:100%;text-align:center;">
+            <div style="font-size:36px;margin-bottom:6px;">⚠️</div>
+            <h5 style="font-weight:700;color:#333;margin:0;font-family:Poppins;">
+              Data Serupa Ditemukan
+            </h5>
+            <p style="color:#666;font-size:13px;margin:6px 0 0;font-family:Poppins;">
+              Terdapat data dengan nama dan lokasi yang mirip
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-body" style="padding:16px 20px;">
+          <div id="duplicateList"></div>
+        </div>
+
+        <div class="modal-footer"
+             style="border-top:1px solid #F3F4F6;padding:12px 20px 16px;">
+          <div style="width:100%;">
+            <div style="display:flex;gap:10px;">
+              <button type="button" onclick="closeDuplicateModal()"
+                style="flex:1;padding:10px;border:1.5px solid #D1D5DB;
+                       border-radius:8px;background:white;color:#555;
+                       font-family:Poppins;font-size:13px;cursor:pointer;">
+                ✕ Batal
+              </button>
+              <button type="button" onclick="confirmSaveDuplicate()"
+                style="flex:1;padding:10px;border:none;border-radius:8px;
+                       background:#C02016;color:white;font-family:Poppins;
+                       font-size:13px;font-weight:600;cursor:pointer;">
+                💾 Tetap Simpan
+              </button>
+            </div>
+            <p style="text-align:center;font-size:11px;color:#9CA3AF;
+                      margin:8px 0 0;font-family:Poppins;">
+              Data baru akan ditambahkan meski ada yang serupa
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
