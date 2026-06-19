@@ -44,6 +44,45 @@
             </div>
             @endif
 
+            {{-- 4 Kartu Statistik --}}
+            <div class="row g-3 mb-4">
+              @php
+                $statCards = [
+                    ['icon'=>'fa-map-marker-alt','label'=>'Total Lokasi',
+                     'value'=>$totalLokasi,'color'=>'#3B82F6','bg'=>'#EFF6FF'],
+                    ['icon'=>'fa-user-check','label'=>'Customer',
+                     'value'=>$customerTotal,'color'=>'#10B981','bg'=>'#ECFDF5'],
+                    ['icon'=>'fa-user-times','label'=>'Non-Customer',
+                     'value'=>$nonCustomerTotal,'color'=>'#C02016','bg'=>'#FEF2F2'],
+                    ['icon'=>'fa-clock','label'=>'Pending Verifikasi',
+                     'value'=>$totalPending,'color'=>'#F59E0B','bg'=>'#FFFBEB'],
+                ];
+              @endphp
+              @foreach($statCards as $card)
+              <div class="col-6 col-md-3">
+                <div style="background:{{ $card['bg'] }};border-radius:12px;
+                            padding:18px;position:relative;overflow:hidden;
+                            box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                            transition:transform 0.2s;"
+                     onmouseover="this.style.transform='translateY(-3px)'"
+                     onmouseout="this.style.transform='translateY(0)'">
+                  <i class="fas {{ $card['icon'] }}"
+                     style="position:absolute;right:10px;top:10px;
+                            font-size:32px;color:{{ $card['color'] }};
+                            opacity:0.12;"></i>
+                  <div style="font-size:26px;font-weight:700;
+                              color:{{ $card['color'] }};">
+                    {{ $card['value'] }}
+                  </div>
+                  <div style="font-size:12px;color:#555;margin-top:3px;
+                              font-weight:500;">
+                    {{ $card['label'] }}
+                  </div>
+                </div>
+              </div>
+              @endforeach
+            </div>
+
             <div class="row text-center mb-4">
                 <div class="col-md-3 info-box">
                     <i class="fas fa-map-marker-alt"></i>
@@ -121,6 +160,95 @@
                 </div>
                 </div>
                 @endif
+
+            {{-- Chart Tren Konversi (selalu render, data bisa kosong) --}}
+            <div class="row gx-3 gy-2 mt-3">
+              <div class="col-12">
+                <div style="background:white;border-radius:12px;
+                            padding:22px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="display:flex;justify-content:space-between;
+                              align-items:center;margin-bottom:14px;
+                              flex-wrap:wrap;gap:8px;">
+                    <div>
+                      <h6 style="font-weight:700;color:#111;margin:0;">
+                        📈 Tren Konversi &amp; Churn
+                      </h6>
+                      <p style="font-size:12px;color:#888;margin:2px 0 0;">
+                        Konversi (Non→Customer) vs Churn (Customer→Non) per periode
+                      </p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                      <select id="periodeSelector" onchange="updateTrenChart()"
+                              style="font-size:12px;padding:4px 10px;border-radius:8px;
+                                     border:1px solid #D1D5DB;background:white;cursor:pointer;
+                                     color:#374151;font-family:inherit;">
+                        <option value="weekly">1 Minggu</option>
+                        <option value="monthly">1 Bulan</option>
+                        <option value="sixmonth" selected>6 Bulan</option>
+                      </select>
+                      <div id="trenBadge" style="font-size:12px;font-weight:600;
+                           padding:4px 12px;border-radius:20px;"></div>
+                    </div>
+                  </div>
+
+                  @if($statusChanges->every(fn($m) => $m['konversi'] === 0 && $m['churn'] === 0))
+                  <p style="font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:8px;">
+                    ℹ️ Belum ada data konversi maupun churn. Riwayat akan muncul setelah ada perubahan tipe lokasi.
+                  </p>
+                  @endif
+
+                  <canvas id="chartTren" height="90"></canvas>
+
+                  <div class="row g-3 mt-3">
+                    <div class="col-6 col-md-3">
+                      <div style="background:#ECFDF5;border-radius:10px;
+                                  padding:14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:700;color:#10B981;">
+                          {{ $konversiBulanIni }}
+                        </div>
+                        <div style="font-size:11px;color:#065F46;margin-top:3px;">
+                          ✅ Konversi Bulan Ini
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div style="background:#F0FDF4;border-radius:10px;
+                                  padding:14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:700;color:#6B7280;">
+                          {{ $konversiBulanLalu }}
+                        </div>
+                        <div style="font-size:11px;color:#374151;margin-top:3px;">
+                          📅 Konversi Bulan Lalu
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div style="background:#FEF2F2;border-radius:10px;
+                                  padding:14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:700;color:#EF4444;">
+                          {{ $churnBulanIni }}
+                        </div>
+                        <div style="font-size:11px;color:#991B1B;margin-top:3px;">
+                          🔻 Churn Bulan Ini
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div style="background:#FFF7F7;border-radius:10px;
+                                  padding:14px;text-align:center;">
+                        <div style="font-size:22px;font-weight:700;color:#9CA3AF;">
+                          {{ $churnBulanLalu }}
+                        </div>
+                        <div style="font-size:11px;color:#374151;margin-top:3px;">
+                          📅 Churn Bulan Lalu
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
         </div>
 
     @if($totalAll > 0)
@@ -218,6 +346,113 @@
         });
         </script>
 @endif
+
+<script>
+// === LINE CHART: Tren Konversi & Churn (multi-periode) ===
+const periodeData = {
+    weekly:    @json($weeklyData),
+    monthly:   @json($monthlyData),
+    sixmonth:  @json($statusChanges),
+};
+
+let chartTrenInstance = null;
+
+function renderTrenChart(periode) {
+    const ctxTren = document.getElementById('chartTren');
+    if (!ctxTren) return;
+
+    const data      = periodeData[periode] || periodeData.sixmonth;
+    const labels    = data.map(d => d.label);
+    const konversi  = data.map(d => d.konversi);
+    const churn     = data.map(d => d.churn);
+
+    if (chartTrenInstance) {
+        chartTrenInstance.destroy();
+        chartTrenInstance = null;
+    }
+
+    chartTrenInstance = new Chart(ctxTren, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Konversi (Non→Customer)',
+                    data: konversi,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16,185,129,0.08)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10B981',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                },
+                {
+                    label: 'Churn (Customer→Non)',
+                    data: churn,
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239,68,68,0.06)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#EF4444',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    backgroundColor: '#1F2937',
+                    borderRadius: 8,
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 },
+                    grid: { color: '#F3F4F6' }
+                }
+            }
+        }
+    });
+
+    // Badge: bandingkan total konversi vs churn pada periode ini
+    const totalKonversi = konversi.reduce((a, b) => a + b, 0);
+    const totalChurn    = churn.reduce((a, b) => a + b, 0);
+    const badge = document.getElementById('trenBadge');
+    if (badge) {
+        if (totalKonversi > totalChurn) {
+            badge.textContent      = '✅ Net Positif';
+            badge.style.background = '#ECFDF5';
+            badge.style.color      = '#065F46';
+        } else if (totalChurn > totalKonversi) {
+            badge.textContent      = '⚠️ Net Negatif';
+            badge.style.background = '#FEF3C7';
+            badge.style.color      = '#92400E';
+        } else {
+            badge.textContent      = '➡️ Seimbang';
+            badge.style.background = '#F3F4F6';
+            badge.style.color      = '#374151';
+        }
+    }
+}
+
+function updateTrenChart() {
+    const sel = document.getElementById('periodeSelector');
+    renderTrenChart(sel ? sel.value : 'sixmonth');
+}
+
+// Render awal dengan periode 6 bulan
+renderTrenChart('sixmonth');
+</script>
 
 </body>
 </html>
