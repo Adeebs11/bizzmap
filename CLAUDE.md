@@ -114,7 +114,9 @@ Leaflet.js. Dibuat sebagai skripsi dengan metode Extreme Programming.
 - [x] P2A: Buat tabel location_histories
         (location_id, changed_by user_id, old_status, new_status, timestamp)
         Trigger: approve & bulkApprove saja (reject langsung hapus data)
+        + tracking perubahan type (non_customer↔customer) via updateLocation
         History tampil sebagai timeline di modal Detail pending & locations
+        change_type enum: 'status' | 'type'
 - [ ] P2B: Dashboard perubahan status bulanan
         (chart di halaman demografi: berapa non-customer → customer per bulan)
 
