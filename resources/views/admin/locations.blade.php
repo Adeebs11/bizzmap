@@ -285,11 +285,20 @@
             container.dataset.loaded = '1';
             return;
           }
-          var statusColor = { approved: '#10B981', pending: '#6B7280' };
-          var statusLabel = { approved: 'Approved', pending: 'Pending' };
           var html = '<div style="position:relative;padding-left:18px;">';
           histories.forEach(function(h, i) {
-            var color = statusColor[h.new_status] || '#6B7280';
+            var badgeHtml = '', color = '';
+            if (h.change_type === 'type') {
+              color = h.new_type === 'customer' ? '#3B82F6' : '#C02016';
+              var typeLabel = h.new_type === 'customer' ? 'Customer' : 'Non-Customer';
+              badgeHtml = '<span style="background:' + color + ';color:white;border-radius:4px;' +
+                'font-size:10px;padding:1px 6px;font-weight:600;">🔄 Jadi ' + typeLabel + '</span>';
+            } else {
+              color = h.new_status === 'approved' ? '#10B981' : '#6B7280';
+              var statusLabel = h.new_status === 'approved' ? 'Approved' : 'Pending';
+              badgeHtml = '<span style="background:' + color + ';color:white;border-radius:4px;' +
+                'font-size:10px;padding:1px 6px;font-weight:600;">' + statusLabel + '</span>';
+            }
             html += '<div style="position:relative;margin-bottom:10px;">' +
               '<div style="position:absolute;left:-18px;top:3px;width:9px;height:9px;' +
               'border-radius:50%;background:' + color + ';"></div>' +
@@ -297,9 +306,7 @@
                 ? '<div style="position:absolute;left:-14px;top:12px;width:2px;' +
                   'height:calc(100% + 2px);background:#E5E7EB;"></div>' : '') +
               '<div style="background:' + color + '15;border-radius:6px;padding:6px 9px;">' +
-              '<span style="background:' + color + ';color:white;border-radius:4px;' +
-              'font-size:10px;padding:1px 6px;font-weight:600;">' +
-              statusLabel[h.new_status] + '</span>' +
+              badgeHtml +
               '<div style="font-size:11px;color:#374151;margin-top:3px;">' +
               '👤 ' + h.user + ' · ' + h.date + '</div>' +
               (h.note ? '<div style="font-size:11px;color:#666;margin-top:2px;">📝 ' + h.note + '</div>' : '') +

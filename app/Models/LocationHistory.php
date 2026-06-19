@@ -8,7 +8,9 @@ class LocationHistory extends Model
 {
     protected $fillable = [
         'location_id', 'changed_by',
-        'old_status', 'new_status', 'note',
+        'old_status', 'new_status',
+        'old_type', 'new_type', 'change_type',
+        'note',
     ];
 
     public function location()

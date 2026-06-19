@@ -370,11 +370,14 @@ class LocationController extends Controller
             ->get()
             ->map(function ($h) {
                 return [
-                    'old_status' => $h->old_status,
-                    'new_status' => $h->new_status,
-                    'note'       => $h->note,
-                    'user'       => $h->user->name ?? 'Sistem',
-                    'date'       => $h->created_at->format('d M Y, H:i'),
+                    'change_type' => $h->change_type,
+                    'old_status'  => $h->old_status,
+                    'new_status'  => $h->new_status,
+                    'old_type'    => $h->old_type,
+                    'new_type'    => $h->new_type,
+                    'note'        => $h->note,
+                    'user'        => $h->user->name ?? 'Sistem',
+                    'date'        => $h->created_at->format('d M Y, H:i'),
                 ];
             });
 

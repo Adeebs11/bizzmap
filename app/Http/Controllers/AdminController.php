@@ -263,7 +263,25 @@ class AdminController extends Controller
             'paket_langganan'  => 'nullable|string|max:100',
         ]);
 
-        $location->update($validated);
+        $oldType = $location->type;
+
+        DB::transaction(function () use ($location, $validated, $oldType) {
+            $location->update($validated);
+
+            if ($oldType !== $validated['type']) {
+                \App\Models\LocationHistory::create([
+                    'location_id' => $location->id,
+                    'changed_by'  => auth()->id(),
+                    'old_type'    => $oldType,
+                    'new_type'    => $validated['type'],
+                    'new_status'  => $location->status,
+                    'change_type' => 'type',
+                    'note'        => $oldType === 'non_customer' && $validated['type'] === 'customer'
+                                      ? 'Konversi menjadi pelanggan'
+                                      : 'Berubah menjadi non-pelanggan',
+                ]);
+            }
+        });
 
         return redirect()->route('admin.locations')->with('success', 'Data lokasi berhasil diperbarui.');
     }
