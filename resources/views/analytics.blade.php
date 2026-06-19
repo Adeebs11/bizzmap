@@ -17,6 +17,17 @@
             $row = $segMap->get($segment);
             return (int) ($row->$field ?? 0);
         };
+
+        $getExtra = function(string $segment) use ($segmentExtra) {
+            return $segmentExtra[$segment] ?? [
+                'non_customer_count' => 0,
+                'potential_count'    => 0,
+                'rekomendasi'        => 'Data belum tersedia.',
+                'bulan_ini'          => 0,
+                'bulan_lalu'         => 0,
+                'selisih'            => 0,
+            ];
+        };
     @endphp
 
     <div class="container mt-5">
@@ -161,6 +172,31 @@
                         </a>
                     </p>
                     <p id="ruko-message"></p>
+                    @php $extra = $getExtra('ruko'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -175,6 +211,31 @@
                         </a>
                     </p>
                     <p id="sekolah-message"></p>
+                    @php $extra = $getExtra('sekolah'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -189,6 +250,31 @@
                         </a>
                     </p>
                     <p id="hotel-message"></p>
+                    @php $extra = $getExtra('hotel'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -203,6 +289,31 @@
                         </a>
                     </p>
                     <p id="multifinance-message"></p>
+                    @php $extra = $getExtra('multifinance'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -217,6 +328,31 @@
                         </a>
                     </p>
                     <p id="health-message"></p>
+                    @php $extra = $getExtra('health'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -231,6 +367,31 @@
                         </a>
                     </p>
                     <p id="ekspedisi-message"></p>
+                    @php $extra = $getExtra('ekspedisi'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -245,6 +406,31 @@
                         </a>
                     </p>
                     <p id="energy-message"></p>
+                    @php $extra = $getExtra('energi'); @endphp
+                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
+                                border-radius:0 8px 8px 0;padding:10px 14px;
+                                margin-top:10px;text-align:left;">
+                        <div style="font-size:13px;color:#333;">
+                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
+                        </div>
+                        @if($extra['potential_count'] > 0)
+                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
+                            ⭐ {{ $extra['potential_count'] }} dari
+                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
+                        </div>
+                        @endif
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            @if($extra['selisih'] > 0)
+                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @elseif($extra['selisih'] < 0)
+                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
+                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
+                            @else
+                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

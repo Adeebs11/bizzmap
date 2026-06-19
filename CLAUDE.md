@@ -126,7 +126,7 @@ Leaflet.js. Dibuat sebagai skripsi dengan metode Extreme Programming.
         migration is_potential, togglePotential API, yellowIcon, toggle button di
         popup marker, Goals Plan tab terintegrasi sidebar, sort potensial di atas
 - [x] P3B: Demografi multi-dimensi (filter omset, paket, bidang bisnis)
-- [ ] P3C: Auto-rekomendasi teks di halaman analytics berdasarkan jumlah data
+- [x] P3C: Auto-rekomendasi teks di halaman analytics berdasarkan jumlah data
 
 ### 🔵 Prioritas 4 — Output & Pengujian
 - [ ] P4A: Export laporan PDF / Excel per periode

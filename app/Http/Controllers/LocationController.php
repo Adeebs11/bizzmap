@@ -619,11 +619,66 @@ class LocationController extends Controller
             ->orderBy('segment')
             ->get();
 
+        // ===== DATA TAMBAHAN PER SEGMEN (NON-CUSTOMER) =====
+        $segmentList = ['ruko', 'sekolah', 'hotel', 'multifinance',
+                        'health', 'ekspedisi', 'energi'];
+
+        $segmentExtra = collect($segmentList)->mapWithKeys(function ($seg) {
+            $nonCustomerCount = DB::table('locations')
+                ->where('status', 'approved')
+                ->where('type', 'non_customer')
+                ->where('segment', $seg)
+                ->count();
+
+            $potentialCount = DB::table('locations')
+                ->where('status', 'approved')
+                ->where('type', 'non_customer')
+                ->where('segment', $seg)
+                ->where('is_potential', true)
+                ->count();
+
+            if ($nonCustomerCount > 20) {
+                $rekomendasi = 'Prioritaskan kunjungan — segmen ini punya banyak target prospek.';
+            } elseif ($nonCustomerCount >= 10) {
+                $rekomendasi = 'Jadwalkan survei lapangan untuk segmen ini.';
+            } else {
+                $rekomendasi = 'Butuh lebih banyak data survei di segmen ini.';
+            }
+
+            $bulanIni = DB::table('locations')
+                ->where('status', 'approved')
+                ->where('type', 'non_customer')
+                ->where('segment', $seg)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+
+            $bulanLalu = DB::table('locations')
+                ->where('status', 'approved')
+                ->where('type', 'non_customer')
+                ->where('segment', $seg)
+                ->whereMonth('created_at', now()->subMonth()->month)
+                ->whereYear('created_at', now()->subMonth()->year)
+                ->count();
+
+            $selisih = $bulanIni - $bulanLalu;
+
+            return [$seg => [
+                'non_customer_count' => $nonCustomerCount,
+                'potential_count'    => $potentialCount,
+                'rekomendasi'        => $rekomendasi,
+                'bulan_ini'          => $bulanIni,
+                'bulan_lalu'         => $bulanLalu,
+                'selisih'            => $selisih,
+            ]];
+        });
+
         return view('analytics', compact(
             'totalCustomer',
             'totalNonCustomer',
             'totalAll',
-            'segmentAnalytics'
+            'segmentAnalytics',
+            'segmentExtra'
         ));
     }
 
