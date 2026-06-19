@@ -376,6 +376,17 @@
       gap: 5px;
     }
     #btnKecamatan:hover { background: #FFF0EF; }
+
+    /* Legenda peta — override body color:white */
+    #legendMap, #legendMap div, #legendMap span {
+      color: #222222;
+    }
+
+    /* Goals plan badge tetap inline-block, tidak melebar */
+    .goals-plan-item .info span {
+      width: auto;
+      display: inline-block;
+    }
   </style>
 </head>
 
@@ -396,6 +407,35 @@
       <button id="btnKecamatan" title="Tampilkan/sembunyikan batas kecamatan">
         🗺️ Batas Kecamatan
       </button>
+
+      <!-- Legenda Peta -->
+      <div id="legendMap"
+           style="position:absolute;bottom:80px;left:60px;
+                  z-index:1000;background:white;border-radius:10px;
+                  padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.12);
+                  font-family:Poppins;font-size:11px;color:#222222;">
+        <div style="font-weight:600;color:#333333;margin-bottom:5px;
+                    text-transform:uppercase;font-size:10px;
+                    letter-spacing:0.4px;">🗺 Keterangan</div>
+        <div style="margin:3px 0;display:flex;align-items:center;">
+          <span style="display:inline-block;width:10px;height:10px;
+                       border-radius:50%;background:#3B82F6;
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Customer</span>
+        </div>
+        <div style="margin:3px 0;display:flex;align-items:center;">
+          <span style="display:inline-block;width:10px;height:10px;
+                       border-radius:50%;background:#C02016;
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Non-Customer</span>
+        </div>
+        <div style="margin:3px 0;display:flex;align-items:center;">
+          <span style="display:inline-block;width:10px;height:10px;
+                       border-radius:50%;background:#F59E0B;
+                       margin-right:6px;flex-shrink:0;"></span>
+          <span style="color:#222222 !important;">Potensial ⭐</span>
+        </div>
+      </div>
     </div>
 
     <div class="sidebar">
@@ -412,6 +452,28 @@
 
       <!-- Scrollable content area -->
       <div class="sidebar-scroll-area">
+
+        <!-- Tab Navigation -->
+        <div style="display:flex;border-bottom:2px solid #f0f0f0;
+                    margin-bottom:14px;">
+          <button id="tab-form-button"
+                  style="flex:1;padding:10px;border:none;
+                         background:none;font-family:Poppins;
+                         font-weight:600;font-size:13px;
+                         color:#C02016;border-bottom:2px solid #C02016;
+                         cursor:pointer;">
+            📍 Tambah Lokasi
+          </button>
+          <button id="goals-plan-button"
+                  class="goals-plan-button"
+                  style="flex:1;padding:10px;border:none;
+                         background:none;font-family:Poppins;
+                         font-weight:600;font-size:13px;
+                         color:#888;border-bottom:2px solid transparent;
+                         cursor:pointer;">
+            🎯 Goals Plan
+          </button>
+        </div>
 
         <form id="dataForm">
 
@@ -539,8 +601,6 @@
 
       </div><!-- /.sidebar-scroll-area -->
 
-      <button id="goals-plan-button" class="goals-plan-button">Goals Plan</button>
-
       <!-- Toast notification -->
       <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 3000;">
         <div id="submitToast" class="toast toast-redesigned" role="alert" aria-live="assertive" aria-atomic="true">
@@ -603,6 +663,21 @@
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
       iconSize: [20, 33], iconAnchor: [10, 33], popupAnchor: [1, -28], shadowSize: [33, 33],
+    });
+
+    var yellowIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:25px;height:41px;position:relative;">' +
+            '<svg viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5' +
+            's12.5-19.1 12.5-28.5C25 5.6 19.4 0 12.5 0z" ' +
+            'fill="#F59E0B" stroke="#fff" stroke-width="1.5"/>' +
+            '<text x="12.5" y="17" font-size="13" ' +
+            'text-anchor="middle" fill="white">★</text>' +
+            '</svg></div>',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [0, -34]
     });
 
     L.control.layers({
@@ -1071,9 +1146,23 @@
     /* ========================
        Add Marker to Map
        ======================== */
-    function addMarker(name, lat, lng, address, type, segmen, extra = {}) {
-      var icon = (type === 'Indibiz') ? blueIcon : redIcon;
+    function addMarker(name, lat, lng, address, type, segmen, extra = {}, locationId = null, isPotential = false) {
+      var icon;
+      if (type === 'Indibiz') {
+        icon = blueIcon;
+      } else if (isPotential) {
+        icon = yellowIcon;
+      } else {
+        icon = redIcon;
+      }
+
       var typeBadgeClass = (type === 'Indibiz') ? 'popup-type-customer' : 'popup-type-non';
+
+      var potentialBadge = (isPotential && type !== 'Indibiz')
+        ? '<span style="background:#FEF3C7;color:#92400E;border:1px solid #F59E0B;' +
+          'border-radius:4px;font-size:10px;padding:1px 6px;margin-left:6px;font-weight:600;">' +
+          '⭐ POTENSIAL</span>'
+        : '';
 
       // Build optional extra rows
       var extraRows = '';
@@ -1090,8 +1179,20 @@
         extraRows += `<div class="popup-row"><i class="fa-solid fa-box"></i><div><span class="popup-label">Paket</span><span class="popup-value">${extra.paket_langganan}</span></div></div>`;
       }
 
+      var toggleBtn = (type !== 'Indibiz' && locationId)
+        ? '<div style="padding-top:8px;border-top:1px solid #F3F4F6;margin-top:6px;">' +
+          '<button class="btn-toggle-potential" data-id="' + locationId + '" ' +
+          'style="width:100%;padding:7px;border-radius:6px;cursor:pointer;font-size:12px;' +
+          'font-family:Poppins;font-weight:500;transition:all 0.2s;' +
+          (isPotential
+            ? 'background:#F59E0B;color:white;border:none;'
+            : 'background:white;color:#F59E0B;border:1.5px solid #F59E0B;') + '">' +
+          (isPotential ? '✕ Hapus Tanda Potensial' : '⭐ Tandai Potensial') +
+          '</button></div>'
+        : '';
+
       var popupHtml = `
-        <div class="popup-header">${name}</div>
+        <div class="popup-header">${name}${potentialBadge}</div>
         <div class="popup-body">
           <div class="popup-row">
             <i class="fa-solid fa-location-dot"></i>
@@ -1106,11 +1207,48 @@
             <div><span class="popup-label">Segmen</span><span class="popup-value">${segmen}</span></div>
           </div>
           ${extraRows}
+          ${toggleBtn}
         </div>`;
 
-      L.marker([lat, lng], { icon: icon, title: name })
-        .bindPopup(popupHtml, { maxWidth: 270 })
-        .addTo(markerGroup);
+      var marker = L.marker([lat, lng], { icon: icon, title: name, locationId: locationId })
+        .bindPopup(popupHtml, { maxWidth: 270 });
+
+      if (locationId && type !== 'Indibiz') {
+        marker.on('popupopen', function () {
+          var btn = document.querySelector('.leaflet-popup .btn-toggle-potential');
+          if (btn) {
+            btn.addEventListener('click', function () {
+              togglePotential(locationId);
+            });
+          }
+        });
+      }
+
+      marker.addTo(markerGroup);
+    }
+
+    /* ========================
+       Toggle Potensial
+       ======================== */
+    function togglePotential(locationId) {
+      var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      fetch('/locations/' + locationId + '/toggle-potential', {
+        method: 'PATCH',
+        headers: {
+          'X-CSRF-TOKEN': csrf,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        showSubmitPopup(data.message, 'success');
+        loadMarkers();
+      })
+      .catch(function () {
+        showSubmitPopup('Gagal mengubah status potensial.', 'danger');
+      });
     }
 
     /* ========================
@@ -1122,14 +1260,16 @@
       });
       const rows = await res.json();
 
-      // Keep localStorage in sync for download
+      // Keep localStorage in sync for download + goals plan
       const markersForLocal = rows.map(r => ({
+        id:               r.id,
         name:             r.name,
         latitude:         r.latitude,
         longitude:        r.longitude,
         address:          r.address,
         type:             mapDbTypeToUi(r.type),
         segmen:           mapDbSegmentToUi(r.type, r.segment),
+        is_potential:     r.is_potential || false,
         owner_name:       r.owner_name      ?? '',
         phone:            r.phone           ?? '',
         business_detail:  r.business_detail ?? '',
@@ -1153,9 +1293,16 @@
             business_detail: r.business_detail ?? null,
             omset:           r.omset           ?? null,
             paket_langganan: r.paket_langganan ?? null,
-          }
+          },
+          r.id,
+          r.is_potential || false
         );
       });
+
+      // Jika tab Goals Plan sedang aktif, refresh tampilannya
+      if (document.getElementById('goals-plan').style.display !== 'none') {
+        loadGoalsPlan();
+      }
     }
 
     loadMarkers();
@@ -1183,54 +1330,123 @@
     }
 
     /* ========================
-       Goals Plan Panel
+       Goals Plan Tab Switching
        ======================== */
+    function activateTab(tab) {
+      var formBtn  = document.getElementById('tab-form-button');
+      var gpBtn    = document.getElementById('goals-plan-button');
+      var form     = document.getElementById('dataForm');
+      var goalsPlan = document.getElementById('goals-plan');
+
+      if (tab === 'goals') {
+        form.style.display      = 'none';
+        goalsPlan.style.display = 'block';
+        gpBtn.style.color        = '#C02016';
+        gpBtn.style.borderBottom = '2px solid #C02016';
+        formBtn.style.color      = '#888';
+        formBtn.style.borderBottom = 'none';
+        loadGoalsPlan();
+      } else {
+        form.style.display      = 'block';
+        goalsPlan.style.display = 'none';
+        formBtn.style.color      = '#C02016';
+        formBtn.style.borderBottom = '2px solid #C02016';
+        gpBtn.style.color        = '#888';
+        gpBtn.style.borderBottom = 'none';
+      }
+    }
+
     document.getElementById('goals-plan-button').addEventListener('click', function () {
-      document.getElementById('dataForm').style.display    = 'none';
-      document.getElementById('goals-plan').style.display  = 'block';
-      document.getElementById('goals-plan-button').style.display = 'none';
-      loadGoalsPlan();
+      activateTab('goals');
+    });
+
+    document.getElementById('tab-form-button').addEventListener('click', function () {
+      activateTab('form');
     });
 
     document.getElementById('back-to-form-button').addEventListener('click', function () {
-      document.getElementById('dataForm').style.display    = 'block';
-      document.getElementById('goals-plan').style.display  = 'none';
-      document.getElementById('goals-plan-button').style.display = 'block';
+      activateTab('form');
     });
 
     function loadGoalsPlan() {
       var markers = JSON.parse(localStorage.getItem('markers')) || [];
-      var nonCustomerMarkers = markers.filter(m => m.type === 'Non-Customer');
-      var container = document.getElementById('goals-plan-container');
+      var nonCustomerMarkers = markers.filter(function (m) {
+        return m.type === 'Non-Customer';
+      });
 
+      // Urutkan: yang is_potential=true di paling atas
+      nonCustomerMarkers.sort(function (a, b) {
+        return (b.is_potential ? 1 : 0) - (a.is_potential ? 1 : 0);
+      });
+
+      var container = document.getElementById('goals-plan-container');
       container.innerHTML = '';
+
+      if (nonCustomerMarkers.length === 0) {
+        container.innerHTML =
+          '<div style="text-align:center;color:#9CA3AF;' +
+          'padding:20px 0;font-size:13px;">Belum ada data non-customer.</div>';
+        return;
+      }
+
       nonCustomerMarkers.forEach(function (markerData, index) {
         var item = document.createElement('div');
         item.className   = 'goals-plan-item';
         item.dataset.index = index;
-        item.innerHTML = `
-          <span class="marker-icon"><i class="fas fa-map-marker-alt"></i></span>
-          <div class="info">
-            <div><strong>Nama</strong> ${markerData.name}</div>
-            <div><strong>Koordinat</strong> ${markerData.latitude}, ${markerData.longitude}</div>
-            <div><strong>Alamat</strong> ${markerData.address}</div>
-          </div>
-          <div class="actions">
-            <button class="btn-check"><i class="fas fa-check"></i></button>
-            <button class="btn-info"><i class="fas fa-info-circle"></i></button>
-          </div>`;
+
+        // Highlight khusus jika potensial
+        if (markerData.is_potential) {
+          item.style.background  = '#FFFBEB';
+          item.style.borderLeft  = '3px solid #F59E0B';
+          item.style.paddingLeft = '8px';
+        }
+
+        var potentialTag = markerData.is_potential
+          ? '<span style="display:inline-block;background:#F59E0B;color:white;' +
+            'border-radius:4px;font-size:10px;padding:2px 8px;margin-left:8px;' +
+            'font-weight:600;white-space:nowrap;vertical-align:middle;">⭐ Potensial</span>'
+          : '';
+
+        var iconColor = markerData.is_potential ? '#F59E0B' : '#ff0000';
+
+        item.innerHTML =
+          '<span class="marker-icon"><i class="fas fa-map-marker-alt" ' +
+          'style="color:' + iconColor + ';"></i></span>' +
+          '<div class="info" style="flex:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Nama</strong>' +
+          '<span>' + markerData.name + '</span>' +
+          potentialTag +
+          '</div>' +
+          '<div style="display:flex;gap:6px;margin-bottom:4px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Koordinat</strong>' +
+          '<span>' + markerData.latitude + ', ' + markerData.longitude + '</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+          '<strong style="min-width:70px;flex-shrink:0;">Alamat</strong>' +
+          '<span>' + markerData.address + '</span>' +
+          '</div>' +
+          '</div>' +
+          '<div class="actions" style="flex-shrink:0;align-self:flex-start;display:flex;gap:6px;">' +
+          '<button class="btn-check"><i class="fas fa-check"></i></button>' +
+          '<button class="btn-info"><i class="fas fa-info-circle"></i></button>' +
+          '</div>';
+
         container.appendChild(item);
 
         item.querySelector('.marker-icon').addEventListener('click', function () {
           var latlng = [markerData.latitude, markerData.longitude];
           map.setView(latlng, 15);
-          var m = markerGroup.getLayers().find(mk => mk.getLatLng().equals(latlng));
-          if (m) m.openPopup();
+          var layers = markerGroup.getLayers();
+          var found = layers.find(function (mk) {
+            return mk.options.locationId === markerData.id;
+          });
+          if (found) found.openPopup();
         });
       });
 
-      container.querySelectorAll('.btn-check').forEach(btn => {
-        btn.addEventListener('click', () => btn.classList.toggle('active'));
+      container.querySelectorAll('.btn-check').forEach(function (btn) {
+        btn.addEventListener('click', function () { btn.classList.toggle('active'); });
       });
     }
 
