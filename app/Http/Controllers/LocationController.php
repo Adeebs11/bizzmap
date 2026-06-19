@@ -20,6 +20,47 @@ class LocationController extends Controller
         return response()->json($locations);
     }
 
+    // Private: hitung jarak Haversine & kembalikan kandidat duplikat
+    private function checkDuplicate($name, $latitude, $longitude)
+    {
+        $candidates = Location::where('name', 'LIKE', '%' . $name . '%')
+            ->whereIn('status', ['pending', 'approved'])
+            ->select('id', 'name', 'address', 'type', 'latitude', 'longitude', 'status')
+            ->get();
+
+        $duplicates = $candidates->filter(function ($loc) use ($latitude, $longitude) {
+            $R    = 6371000;
+            $dLat = deg2rad($loc->latitude  - $latitude);
+            $dLng = deg2rad($loc->longitude - $longitude);
+            $a    = sin($dLat / 2) * sin($dLat / 2)
+                  + cos(deg2rad($latitude)) * cos(deg2rad($loc->latitude))
+                  * sin($dLng / 2) * sin($dLng / 2);
+            $dist = $R * 2 * atan2(sqrt($a), sqrt(1 - $a));
+            $loc->distance = (int) round($dist);
+            return $dist < 50;
+        });
+
+        return $duplicates->values()->toArray();
+    }
+
+    // GET: endpoint cek duplikat sebelum simpan
+    public function checkDuplicateEndpoint(Request $request)
+    {
+        $request->validate([
+            'name'      => 'required|string|max:150',
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $duplicates = $this->checkDuplicate(
+            $request->name,
+            $request->latitude,
+            $request->longitude
+        );
+
+        return response()->json(['duplicates' => $duplicates]);
+    }
+
     // POST: simpan data dari user sebagai pending
     public function store(Request $request)
     {
@@ -36,6 +77,22 @@ class LocationController extends Controller
             'type'             => 'required|in:customer,non_customer',
             'segment'          => 'required|in:sekolah,ruko,hotel,multifinance,health,ekspedisi,energi',
         ]);
+
+        // Cek duplikat kecuali user memilih force save
+        if (!$request->boolean('force')) {
+            $duplicates = $this->checkDuplicate(
+                $validated['name'],
+                $validated['latitude'],
+                $validated['longitude']
+            );
+            if (count($duplicates) > 0) {
+                return response()->json([
+                    'status'     => 'duplicate',
+                    'duplicates' => $duplicates,
+                    'message'    => 'Ditemukan data serupa di lokasi ini.',
+                ], 409);
+            }
+        }
 
         $location = Location::create([
             'user_id'          => $request->user()->id,
