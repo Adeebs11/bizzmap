@@ -44,10 +44,19 @@ class AdminController extends Controller
     {
         $location = Location::findOrFail($id);
 
-        // hanya approve jika masih pending (opsional safety)
         if ($location->status === 'pending') {
-            $location->status = 'approved';
-            $location->save();
+            DB::transaction(function () use ($location) {
+                $oldStatus = $location->status;
+                $location->status = 'approved';
+                $location->save();
+
+                \App\Models\LocationHistory::create([
+                    'location_id' => $location->id,
+                    'changed_by'  => auth()->id(),
+                    'old_status'  => $oldStatus,
+                    'new_status'  => 'approved',
+                ]);
+            });
         }
 
         return redirect()->back()->with('success', 'Data berhasil di-approve.');
@@ -270,13 +279,26 @@ class AdminController extends Controller
         public function bulkApprove(Request $request)
     {
         $validated = $request->validate([
-            'selected' => 'required|array|min:1',
+            'selected'   => 'required|array|min:1',
             'selected.*' => 'integer',
         ]);
 
         $ids = $validated['selected'];
 
         $updated = DB::transaction(function () use ($ids) {
+            $locations = Location::whereIn('id', $ids)
+                ->where('status', 'pending')
+                ->get();
+
+            foreach ($locations as $location) {
+                \App\Models\LocationHistory::create([
+                    'location_id' => $location->id,
+                    'changed_by'  => auth()->id(),
+                    'old_status'  => 'pending',
+                    'new_status'  => 'approved',
+                ]);
+            }
+
             return Location::whereIn('id', $ids)
                 ->where('status', 'pending')
                 ->update(['status' => 'approved']);

@@ -102,18 +102,19 @@ Leaflet.js. Dibuat sebagai skripsi dengan metode Extreme Programming.
 - [x] CI/CD dengan GitHub Actions
 
 ### 🔴 Prioritas 1 — Fondasi Data (Kerjakan Duluan)
-- [ ] P1A: Tambah field baru di tabel locations:
+- [x] P1A: Tambah field baru di tabel locations:
         owner_name, phone, business_detail, omset, paket_langganan
         (migration baru + update Model, Controller, Form geo.blade.php,
-        form edit admin, popup marker)
-- [ ] P1B: Pencegahan data duplikat
+        form edit admin, popup marker, import CSV, export XLSX)
+- [x] P1B: Pencegahan data duplikat
         (cek nama bisnis + radius koordinat < 50m, warning popup frontend,
         validasi backend)
 
 ### 🟡 Prioritas 2 — Tracking & History
-- [ ] P2A: Buat tabel location_histories
+- [x] P2A: Buat tabel location_histories
         (location_id, changed_by user_id, old_status, new_status, timestamp)
-        Trigger: setiap approve / reject / edit status oleh admin
+        Trigger: approve & bulkApprove saja (reject langsung hapus data)
+        History tampil sebagai timeline di modal Detail pending & locations
 - [ ] P2B: Dashboard perubahan status bulanan
         (chart di halaman demografi: berapa non-customer → customer per bulan)
 

@@ -386,11 +386,11 @@
       <a href="javascript:history.back()" class="btn btn-light back-button">
         <i class="fa-solid fa-left-long"></i>
       </a>
-      <label for="upload-csv" class="upload-button" title="Upload data">
+      <label for="upload-csv" class="upload-button" title="Upload data (CSV)">
         <i class="fa-solid fa-file-arrow-up"></i>
         <input type="file" id="upload-csv" accept=".csv" style="display: none;" />
       </label>
-      <button id="download-xlsx" class="download-button" title="Download data">
+      <button id="download-xlsx" class="download-button" title="Download data (XLSX)">
         <i class="fa-solid fa-file-arrow-down"></i>
       </button>
       <button id="btnKecamatan" title="Tampilkan/sembunyikan batas kecamatan">
@@ -1122,14 +1122,19 @@
       });
       const rows = await res.json();
 
-      // Keep localStorage in sync for Goals Plan / download
+      // Keep localStorage in sync for download
       const markersForLocal = rows.map(r => ({
-        name:      r.name,
-        latitude:  r.latitude,
-        longitude: r.longitude,
-        address:   r.address,
-        type:      mapDbTypeToUi(r.type),
-        segmen:    mapDbSegmentToUi(r.type, r.segment),
+        name:             r.name,
+        latitude:         r.latitude,
+        longitude:        r.longitude,
+        address:          r.address,
+        type:             mapDbTypeToUi(r.type),
+        segmen:           mapDbSegmentToUi(r.type, r.segment),
+        owner_name:       r.owner_name      ?? '',
+        phone:            r.phone           ?? '',
+        business_detail:  r.business_detail ?? '',
+        omset:            r.omset           ?? '',
+        paket_langganan:  r.paket_langganan ?? '',
       }));
       localStorage.setItem('markers', JSON.stringify(markersForLocal));
 
@@ -1284,14 +1289,22 @@
       const workbook  = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Markers');
       worksheet.columns = [
-        { header: 'Nama',      key: 'name',      width: 20 },
-        { header: 'Latitude',  key: 'latitude',  width: 15 },
-        { header: 'Longitude', key: 'longitude', width: 15 },
-        { header: 'Alamat',    key: 'address',   width: 30 },
-        { header: 'Tipe',      key: 'type',      width: 15 },
-        { header: 'Segmen',    key: 'segmen',    width: 20 },
+        { header: 'Nama',            key: 'name',            width: 20 },
+        { header: 'Latitude',        key: 'latitude',        width: 15 },
+        { header: 'Longitude',       key: 'longitude',       width: 15 },
+        { header: 'Alamat',          key: 'address',         width: 30 },
+        { header: 'Tipe',            key: 'type',            width: 15 },
+        { header: 'Segmen',          key: 'segmen',          width: 20 },
+        { header: 'Nama Pemilik',    key: 'owner_name',      width: 20 },
+        { header: 'Telepon',         key: 'phone',           width: 18 },
+        { header: 'Bidang Bisnis',   key: 'business_detail', width: 25 },
+        { header: 'Omset/Bulan',     key: 'omset',           width: 28 },
+        { header: 'Paket Langganan', key: 'paket_langganan', width: 22 },
       ];
-      markers.forEach(m => worksheet.addRow(m));
+      markers.forEach(m => worksheet.addRow({
+        ...m,
+        omset: omsetLabels[m.omset] || m.omset || '',
+      }));
 
       worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
       worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'C02016' } };

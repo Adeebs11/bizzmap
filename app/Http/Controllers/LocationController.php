@@ -242,6 +242,34 @@ class LocationController extends Controller
             return null;
         };
 
+        // Helper mapping omset (opsional — nilai tidak valid menjadi null)
+        $mapOmset = function ($value) {
+            if (!$value || trim((string)$value) === '') return null;
+            $v = strtolower(trim((string) $value));
+            $v = preg_replace('/\s+/', '_', $v);
+
+            $allowed = ['di_bawah_5jt','5jt_20jt','20jt_50jt','50jt_100jt','di_atas_100jt'];
+            if (in_array($v, $allowed, true)) return $v;
+
+            if (str_contains($v, 'bawah') || str_contains($v, '< 5') || str_contains($v, '<5')) return 'di_bawah_5jt';
+            if (str_contains($v, '5') && str_contains($v, '20')) return '5jt_20jt';
+            if (str_contains($v, '20') && str_contains($v, '50')) return '20jt_50jt';
+            if (str_contains($v, '50') && str_contains($v, '100')) return '50jt_100jt';
+            if (str_contains($v, 'atas') || str_contains($v, '> 100') || str_contains($v, '>100')) return 'di_atas_100jt';
+
+            return null;
+        };
+
+        // Helper ambil nilai dari row berdasarkan beberapa kemungkinan nama kolom
+        $getCol = function ($row, array $keys) {
+            foreach ($keys as $k) {
+                if (isset($row[$k]) && trim((string)$row[$k]) !== '') {
+                    return trim((string)$row[$k]);
+                }
+            }
+            return null;
+        };
+
         while (($data = fgetcsv($handle)) !== false) {
         $data = $parseRow($data);
         if (!$data) continue;
@@ -268,6 +296,13 @@ class LocationController extends Controller
             $type = $mapType($row['type'] ?? null);
             $segment = $mapSegment($row[$segmentKey] ?? null);
 
+            // Field opsional — tidak masuk validasi wajib
+            $ownerName      = $getCol($row, ['owner_name', 'nama_pemilik', 'pemilik']);
+            $phone          = $getCol($row, ['phone', 'telepon', 'no_telepon', 'no._telepon']);
+            $businessDetail = $getCol($row, ['business_detail', 'bidang_bisnis', 'detail_bisnis']);
+            $omset          = $mapOmset($getCol($row, ['omset']));
+            $paketLangganan = $getCol($row, ['paket_langganan', 'paket']);
+
             // Validasi per baris (ringkas tapi jelas)
             $rowErrors = [];
             if ($name === '') $rowErrors[] = 'name kosong';
@@ -286,16 +321,21 @@ class LocationController extends Controller
             }
 
             $rowsToInsert[] = [
-                'user_id' => $request->user()->id,
-                'name' => $name,
-                'address' => $address,
-                'latitude' => (float) $lat,
-                'longitude' => (float) $lng,
-                'type' => $type,
-                'segment' => $segment,
-                'status' => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'          => $request->user()->id,
+                'name'             => $name,
+                'owner_name'       => $ownerName,
+                'phone'            => $phone,
+                'business_detail'  => $businessDetail,
+                'omset'            => $omset,
+                'paket_langganan'  => $paketLangganan,
+                'address'          => $address,
+                'latitude'         => (float) $lat,
+                'longitude'        => (float) $lng,
+                'type'             => $type,
+                'segment'          => $segment,
+                'status'           => 'pending',
+                'created_at'       => now(),
+                'updated_at'       => now(),
             ];
         }
 
@@ -320,6 +360,25 @@ class LocationController extends Controller
             'failed' => count($errors),
             'errors' => array_slice($errors, 0, 15), // batasi biar respons tidak kepanjangan
         ], 201);
+    }
+
+    public function history($id)
+    {
+        $histories = \App\Models\LocationHistory::where('location_id', $id)
+            ->with('user:id,name')
+            ->latest()
+            ->get()
+            ->map(function ($h) {
+                return [
+                    'old_status' => $h->old_status,
+                    'new_status' => $h->new_status,
+                    'note'       => $h->note,
+                    'user'       => $h->user->name ?? 'Sistem',
+                    'date'       => $h->created_at->format('d M Y, H:i'),
+                ];
+            });
+
+        return response()->json($histories);
     }
 
     public function demografi()
