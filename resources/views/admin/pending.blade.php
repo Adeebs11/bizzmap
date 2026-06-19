@@ -165,6 +165,17 @@
                             <td>: {{ $loc->paket_langganan ?? '-' }}</td>
                           </tr>
                         </table>
+
+                        <hr style="margin:14px 0;">
+                        <div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px;">
+                            📋 Riwayat Status
+                        </div>
+                        <div id="historyContainer{{ $loc->id }}">
+                            <div style="text-align:center;color:#9CA3AF;font-size:12px;padding:10px 0;">
+                                <div class="spinner-border spinner-border-sm" role="status" style="color:#C02016;"></div>
+                                <div style="margin-top:4px;">Memuat riwayat...</div>
+                            </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -203,6 +214,56 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            /* ---- History fetch saat modal dibuka ---- */
+            document.querySelectorAll('[id^="modalDetail"]').forEach(function(modalEl) {
+                modalEl.addEventListener('show.bs.modal', function() {
+                    var locId     = modalEl.id.replace('modalDetail', '');
+                    var container = document.getElementById('historyContainer' + locId);
+                    if (!container || container.dataset.loaded === '1') return;
+
+                    fetch('/locations/' + locId + '/history')
+                    .then(function(res) { return res.json(); })
+                    .then(function(histories) {
+                        if (!histories.length) {
+                            container.innerHTML =
+                                '<div style="text-align:center;color:#9CA3AF;font-size:12px;padding:10px 0;">' +
+                                'ℹ️ Belum ada perubahan status</div>';
+                            container.dataset.loaded = '1';
+                            return;
+                        }
+                        var statusColor = { approved: '#10B981', pending: '#6B7280' };
+                        var statusLabel = { approved: 'Approved', pending: 'Pending' };
+                        var html = '<div style="position:relative;padding-left:18px;">';
+                        histories.forEach(function(h, i) {
+                            var color = statusColor[h.new_status] || '#6B7280';
+                            html += '<div style="position:relative;margin-bottom:10px;">' +
+                                '<div style="position:absolute;left:-18px;top:3px;width:9px;height:9px;' +
+                                'border-radius:50%;background:' + color + ';"></div>' +
+                                (i < histories.length - 1
+                                    ? '<div style="position:absolute;left:-14px;top:12px;width:2px;' +
+                                      'height:calc(100% + 2px);background:#E5E7EB;"></div>' : '') +
+                                '<div style="background:' + color + '15;border-radius:6px;padding:6px 9px;">' +
+                                '<span style="background:' + color + ';color:white;border-radius:4px;' +
+                                'font-size:10px;padding:1px 6px;font-weight:600;">' +
+                                statusLabel[h.new_status] + '</span>' +
+                                '<div style="font-size:11px;color:#374151;margin-top:3px;">' +
+                                '👤 ' + h.user + ' · ' + h.date + '</div>' +
+                                (h.note ? '<div style="font-size:11px;color:#666;margin-top:2px;">📝 ' + h.note + '</div>' : '') +
+                                '</div></div>';
+                        });
+                        html += '</div>';
+                        container.innerHTML = html;
+                        container.dataset.loaded = '1';
+                    })
+                    .catch(function() {
+                        container.innerHTML =
+                            '<div style="color:#C02016;font-size:12px;text-align:center;">' +
+                            'Gagal memuat riwayat.</div>';
+                    });
+                });
+            });
+
+            /* ---- Bulk action & per-page ---- */
             const selectAll       = document.getElementById('selectAll');
             const selectedCountEl = document.getElementById('selectedCount');
             const btnApprove      = document.getElementById('btnBulkApprove');

@@ -25,6 +25,13 @@ class Location extends Model
         'status',
     ];
 
+    public function histories()
+    {
+        return $this->hasMany(LocationHistory::class)
+                    ->latest()
+                    ->with('user:id,name');
+    }
+
     public static function omsetLabel(): array
     {
         return [
