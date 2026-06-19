@@ -9,7 +9,11 @@
     <link rel="stylesheet" href="{{ asset('css/styledemografi.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <style>
+        .carousel-indicators button.active {
+            opacity: 1 !important;
+        }
+    </style>
 
 </head>
 <body>
@@ -84,22 +88,6 @@
             </div>
 
             <div class="row text-center mb-4">
-                <div class="col-md-3 info-box">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h2>8</h2>
-                    <p>Kecamatan</p>
-                </div>
-                <div class="col-md-3 info-box indibiz-count">
-                    <i class="fas fa-briefcase"></i>
-                    <h2>{{ $customerTotal }}</h2>
-                    <p>Customer</p>
-                </div>
-                <div class="col-md-3 info-box non-customer-count">
-                    <i class="fas fa-briefcase"></i>
-                    <h2>{{ $nonCustomerTotal }}</h2>
-                    <p>Non-Customer</p>
-                </div>
-
                 {{-- Wrapper agar ada jarak dari info box atas --}}
                 <div class="segment-badge-wrapper">
                     <div class="row g-3">
@@ -139,27 +127,145 @@
 
         @if($totalAll > 0)
             <div class="row gx-3 gy-2 mb-3">
-                <div class="col-lg-6 mx-auto">
-                    <div class="chart-card chart-lg">
-                    <canvas id="businessTypeChart"></canvas>
+                <div class="col-lg-8 mx-auto">
+                    <div class="chart-card" style="height:auto;min-height:400px;position:relative;padding:16px 16px 12px;">
+
+                        <div id="chartCarousel" class="carousel slide" data-bs-ride="false">
+                            <div class="carousel-inner" style="height:320px;">
+
+                                <div class="carousel-item active">
+                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                        Customer vs Non-Customer
+                                    </h6>
+                                    <div style="position:relative;height:280px;">
+                                        <canvas id="businessTypeChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="carousel-item">
+                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                        Distribusi Segmen Customer
+                                    </h6>
+                                    <div style="position:relative;height:280px;">
+                                        <canvas id="segmentCustomerChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="carousel-item">
+                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                        Distribusi Segmen Non-Customer
+                                    </h6>
+                                    <div style="position:relative;height:280px;">
+                                        <canvas id="segmentNonCustomerChart"></canvas>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button class="carousel-control-prev" type="button"
+                                    data-bs-target="#chartCarousel" data-bs-slide="prev"
+                                    style="width:36px;height:36px;top:50%;transform:translateY(-50%);
+                                           background:rgba(192,32,22,0.7);border-radius:50%;left:-5px;">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button"
+                                    data-bs-target="#chartCarousel" data-bs-slide="next"
+                                    style="width:36px;height:36px;top:50%;transform:translateY(-50%);
+                                           background:rgba(192,32,22,0.7);border-radius:50%;right:-5px;">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+
+                            <div class="carousel-indicators"
+                                 style="position:relative;bottom:0;margin:8px 0 0;
+                                        display:flex;justify-content:center;gap:6px;">
+                                <button type="button" data-bs-target="#chartCarousel"
+                                        data-bs-slide-to="0" class="active" aria-current="true"
+                                        style="width:8px !important;height:8px !important;
+                                               border-radius:50% !important;
+                                               background-color:#C02016 !important;
+                                               border:none !important;
+                                               opacity:0.4;text-indent:-9999px;
+                                               padding:0;margin:0;"></button>
+                                <button type="button" data-bs-target="#chartCarousel"
+                                        data-bs-slide-to="1"
+                                        style="width:8px !important;height:8px !important;
+                                               border-radius:50% !important;
+                                               background-color:#C02016 !important;
+                                               border:none !important;
+                                               opacity:0.4;text-indent:-9999px;
+                                               padding:0;margin:0;"></button>
+                                <button type="button" data-bs-target="#chartCarousel"
+                                        data-bs-slide-to="2"
+                                        style="width:8px !important;height:8px !important;
+                                               border-radius:50% !important;
+                                               background-color:#C02016 !important;
+                                               border:none !important;
+                                               opacity:0.4;text-indent:-9999px;
+                                               padding:0;margin:0;"></button>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
+            @endif
 
-            <div class="row gx-3 gy-2">
-                <div class="col-lg-6">
-                    <div class="chart-card chart-md">
-                    <canvas id="segmentCustomerChart"></canvas>
+            {{-- P3B: Analisis Detail — Omset, Paket, Bidang Bisnis --}}
+            <div style="margin-top:28px;">
+                <h6 style="font-weight:700;color:#111;margin-bottom:16px;
+                           border-left:3px solid #C02016;padding-left:10px;">
+                    Analisis Detail
+                </h6>
+                <div class="row g-3">
+                    {{-- Chart Omset: full width grouped bar --}}
+                    <div class="col-12">
+                        <div class="chart-card" style="height:auto;min-height:320px;padding:20px;">
+                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F4B0; Distribusi Omset</h6>
+                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Perbandingan range omset antara Customer dan Non-Customer</p>
+                            <div style="position:relative;height:240px;max-width:600px;margin:0 auto;">
+                                <canvas id="chartOmset"></canvas>
+                            </div>
+                        </div>
                     </div>
+                    {{-- Chart Paket: doughnut --}}
+                    <div class="col-md-6">
+                        <div class="chart-card" style="height:auto;min-height:340px;padding:20px;">
+                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F4E6; Top 5 Paket Langganan</h6>
+                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Paket Indibiz yang paling banyak digunakan Customer</p>
+                            @if($byPaket->count() > 0)
+                                <div style="position:relative;height:220px;max-width:280px;margin:0 auto;">
+                                    <canvas id="chartPaket"></canvas>
+                                </div>
+                            @else
+                                <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
+                                    <div style="font-size:28px;">&#x1F4E6;</div>
+                                    <div style="font-size:12px;margin-top:6px;">Belum ada data paket langganan</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    {{-- Chart Bidang Bisnis: vertical bar --}}
+                    <div class="col-md-6">
+                        <div class="chart-card" style="height:auto;min-height:340px;padding:20px;">
+                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F3E2; Top 5 Bidang Bisnis</h6>
+                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Jenis usaha yang paling banyak tercatat di sistem</p>
+                            @if($byBidang->count() > 0)
+                                <div style="position:relative;height:220px;max-width:320px;margin:0 auto;">
+                                    <canvas id="chartBidang"></canvas>
+                                </div>
+                            @else
+                                <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
+                                    <div style="font-size:28px;">&#x1F3E2;</div>
+                                    <div style="font-size:12px;margin-top:6px;">Belum ada data bidang bisnis</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div style="background:#F8F9FA;border-radius:10px;padding:12px 16px;margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <span style="font-size:12px;color:#666;">&#x1F4A1; Data hanya menghitung lokasi yang sudah di-approve dan memiliki nilai omset / paket / bidang bisnis terisi.</span>
+                </div>
             </div>
-
-                <div class="col-lg-6">
-                    <div class="chart-card chart-md">
-                    <canvas id="segmentNonCustomerChart"></canvas>
-                    </div>
-                </div>
-                </div>
-                @endif
 
             {{-- Chart Tren Konversi (selalu render, data bisa kosong) --}}
             <div class="row gx-3 gy-2 mt-3">
@@ -344,6 +450,15 @@
                 }
             }
         });
+
+        const chartCarouselEl = document.getElementById('chartCarousel');
+        if (chartCarouselEl) {
+            chartCarouselEl.addEventListener('slid.bs.carousel', function () {
+                Chart.instances && Object.values(Chart.instances).forEach(
+                    function (instance) { instance.resize(); }
+                );
+            });
+        }
         </script>
 @endif
 
@@ -454,5 +569,127 @@ function updateTrenChart() {
 renderTrenChart('sixmonth');
 </script>
 
+{{-- P3B: Chart Omset, Paket, Bidang Bisnis --}}
+<script>
+(function () {
+    const omsetLabelMap = {
+        'di_bawah_5jt'  : '< 5jt',
+        '5jt_20jt'      : '5–20jt',
+        '20jt_50jt'     : '20–50jt',
+        '50jt_100jt'    : '50–100jt',
+        'di_atas_100jt' : '> 100jt'
+    };
+
+    // CHART OMSET: grouped bar
+    const omsetData = @json($byOmset);
+    new Chart(document.getElementById('chartOmset'), {
+        type: 'bar',
+        data: {
+            labels: omsetData.map(d => omsetLabelMap[d.key] || d.key),
+            datasets: [
+                {
+                    label: 'Customer',
+                    data: omsetData.map(d => d.customer),
+                    backgroundColor: '#3B82F6',
+                    borderRadius: 6
+                },
+                {
+                    label: 'Non-Customer',
+                    data: omsetData.map(d => d.non_customer),
+                    backgroundColor: '#C02016',
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    backgroundColor: '#1F2937',
+                    borderRadius: 8,
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
+                    }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+            }
+        }
+    });
+
+    // CHART PAKET: doughnut
+    const paketData = @json($byPaket);
+    if (paketData.length > 0 && document.getElementById('chartPaket')) {
+        new Chart(document.getElementById('chartPaket'), {
+            type: 'doughnut',
+            data: {
+                labels: paketData.map(d => d.paket_langganan),
+                datasets: [{
+                    data: paketData.map(d => d.total),
+                    backgroundColor: ['#C02016','#E8453C','#FF6B6B','#FF9E9E','#FFCECE'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        borderRadius: 8,
+                        callbacks: {
+                            label: ctx => `${ctx.label}: ${ctx.raw} pelanggan`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // CHART BIDANG BISNIS: vertical bar
+    const bidangData = @json($byBidang);
+    if (bidangData.length > 0 && document.getElementById('chartBidang')) {
+        new Chart(document.getElementById('chartBidang'), {
+            type: 'bar',
+            data: {
+                labels: bidangData.map(d => {
+                    var l = d.business_detail;
+                    return l.length > 15 ? l.substring(0, 15) + '…' : l;
+                }),
+                datasets: [{
+                    label: 'Jumlah',
+                    data: bidangData.map(d => d.total),
+                    backgroundColor: ['#C02016','#D4342A','#E8453C','#F55E56','#FF7570'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        borderRadius: 8,
+                        callbacks: {
+                            title: ctx => bidangData[ctx[0].dataIndex].business_detail
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+                }
+            }
+        });
+    }
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
