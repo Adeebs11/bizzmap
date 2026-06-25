@@ -26,10 +26,19 @@
 
         <div class="mb-3">
             <label class="form-label">Role</label>
-            <select name="role" class="form-select" required>
-                <option value="user">User (SA / AR)</option>
-                <option value="admin">Admin</option>
-            </select>
+            @if(auth()->user()->role === 'ar')
+                <select name="role" class="form-select" disabled>
+                    <option value="sa" selected>SA (Sales Assistant)</option>
+                </select>
+                <input type="hidden" name="role" value="sa">
+                <small class="text-muted">Sebagai AR, Anda hanya dapat membuat akun SA.</small>
+            @else
+                <select name="role" class="form-select" required>
+                    <option value="sa">SA (Sales Assistant)</option>
+                    <option value="ar">AR (Account Representative)</option>
+                    <option value="admin">Admin</option>
+                </select>
+            @endif
         </div>
 
         <div class="d-flex gap-2">

@@ -27,7 +27,8 @@
         <div class="mb-3">
             <label class="form-label">Role</label>
             <select name="role" class="form-select" required>
-                <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>User (SA / AR)</option>
+                <option value="sa" {{ old('role', $user->role) === 'sa' ? 'selected' : '' }}>SA (Sales Assistant)</option>
+                <option value="ar" {{ old('role', $user->role) === 'ar' ? 'selected' : '' }}>AR (Account Representative)</option>
                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
         </div>
