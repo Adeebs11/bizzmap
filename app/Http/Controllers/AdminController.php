@@ -21,7 +21,6 @@ class AdminController extends Controller
     // List data yang pending
     public function pending(Request $request)
     {
-
         $perPage = (int) $request->query('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
 
@@ -30,13 +29,23 @@ class AdminController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('admin.pending', compact('locations', 'perPage'));
+        // Hitung ringkasan flag dari SEMUA data pending (bukan hanya halaman aktif)
+        $allPending = Location::where('status', 'pending')->get();
 
-        $locations = Location::where('status', 'pending')
-            ->latest()
-            ->get();
+        $needCheckCount  = 0;
+        $incompleteCount = 0;
 
-        return view('admin.pending', compact('locations'));
+        foreach ($allPending as $loc) {
+            if (count($loc->getCheckFlags()) > 0) {
+                $needCheckCount++;
+            } elseif (count($loc->getIncompleteFields()) > 0) {
+                $incompleteCount++;
+            }
+        }
+
+        return view('admin.pending', compact(
+            'locations', 'perPage', 'needCheckCount', 'incompleteCount'
+        ));
     }
 
     // Approve data pending
