@@ -24,6 +24,33 @@
         — bisa memverifikasi (approve/reject) data pelanggan dan non-pelanggan.
     </div>
 
+    @if($needCheckCount > 0 || $incompleteCount > 0)
+    <div class="row g-2 mb-3">
+        @if($needCheckCount > 0)
+        <div class="col-md-6">
+            <div style="background:#FEF2F2;border-left:4px solid #DC2626;border-radius:8px;padding:10px 14px;">
+                <span style="font-size:14px;">🔴</span>
+                <strong style="color:#991B1B;">Perlu Dicek ({{ $needCheckCount }})</strong>
+                <div style="font-size:12px;color:#7F1D1D;margin-top:2px;">
+                    Berpotensi duplikat atau nama tidak wajar
+                </div>
+            </div>
+        </div>
+        @endif
+        @if($incompleteCount > 0)
+        <div class="col-md-6">
+            <div style="background:#FFFBEB;border-left:4px solid #F59E0B;border-radius:8px;padding:10px 14px;">
+                <span style="font-size:14px;">🟡</span>
+                <strong style="color:#92400E;">Informasi Minim ({{ $incompleteCount }})</strong>
+                <div style="font-size:12px;color:#78350F;margin-top:2px;">
+                    Field opsional belum diisi — boleh tetap di-approve
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+
     <div class="d-flex align-items-center gap-2 mb-3">
         <span class="text-muted">
             Item selected: <strong id="selectedCount">0</strong>
@@ -92,9 +119,29 @@
                                     <input type="checkbox" class="row-check" value="{{ $loc->id }}">
                                 </td>
                                 <td>
+                                    @php
+                                        $checkFlags      = $loc->getCheckFlags();
+                                        $incompleteFields = $loc->getIncompleteFields();
+                                        // Label yang ditampilkan: sembunyikan 'luar_area'
+                                        $visibleLabels = collect($checkFlags)
+                                            ->where('hidden_detail', '!=', true)
+                                            ->pluck('label')
+                                            ->all();
+                                    @endphp
                                     <div class="text-truncate" style="max-width:200px;" title="{{ $loc->name }}">
                                         {{ $loc->name }}
                                     </div>
+                                    @if(count($checkFlags) > 0)
+                                        <span style="background:#FEE2E2;color:#991B1B;border-radius:4px;font-size:10px;padding:1px 6px;margin-top:2px;display:inline-block;"
+                                              title="{{ count($visibleLabels) > 0 ? implode(', ', $visibleLabels) : 'Perlu diverifikasi' }}">
+                                            🔴 Cek Dulu
+                                        </span>
+                                    @elseif(count($incompleteFields) > 0)
+                                        <span style="background:#FEF3C7;color:#92400E;border-radius:4px;font-size:10px;padding:1px 6px;margin-top:2px;display:inline-block;"
+                                              title="Belum diisi: {{ implode(', ', $incompleteFields) }}">
+                                            ℹ️ Info Minim
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="badge {{ $loc->type === 'customer' ? 'text-bg-success' : 'text-bg-secondary' }}">
@@ -113,10 +160,20 @@
                                 </td>
                                 <td class="text-center text-nowrap sticky-action">
                                     <div class="d-inline-flex gap-2">
-                                        <form method="POST" action="{{ route('admin.approve', $loc->id) }}" class="d-inline">
-                                            @csrf
-                                            <button class="btn btn-success btn-sm" type="submit">Approve</button>
-                                        </form>
+                                        @if(count($checkFlags) > 0)
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm btn-approve-flagged"
+                                                    data-id="{{ $loc->id }}"
+                                                    data-name="{{ $loc->name }}"
+                                                    data-reasons="{{ json_encode($visibleLabels) }}">
+                                                Approve
+                                            </button>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.approve', $loc->id) }}" class="d-inline">
+                                                @csrf
+                                                <button class="btn btn-success btn-sm" type="submit">Approve</button>
+                                            </form>
+                                        @endif
                                         <form method="POST" action="{{ route('admin.reject', $loc->id) }}" class="d-inline"
                                               onsubmit="return confirm('Reject data ini? Data akan dihapus.');">
                                             @csrf
@@ -188,6 +245,50 @@
                 </div>
                 @endforeach
 
+                {{-- Modal konfirmasi Approve individual — untuk data flagged Kategori A --}}
+                <div class="modal fade" id="modalApproveConfirm" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius:12px;">
+                      <div class="modal-header" style="background:#FEF2F2;border-radius:12px 12px 0 0;">
+                        <h6 class="modal-title" style="color:#991B1B;">⚠️ Data Ini Perlu Diperhatikan</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p id="approveConfirmName" style="font-weight:600;margin-bottom:8px;"></p>
+                        <ul id="approveConfirmReasons" style="font-size:13px;color:#7F1D1D;margin-bottom:0;"></ul>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success btn-sm" onclick="confirmApprove()">Tetap Approve</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {{-- Modal konfirmasi Bulk Approve — untuk campuran flagged & aman --}}
+                <div class="modal fade" id="modalBulkApproveConfirm" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius:12px;">
+                      <div class="modal-header" style="background:#FEF2F2;border-radius:12px 12px 0 0;">
+                        <h6 class="modal-title" style="color:#991B1B;">⚠️ Konfirmasi Bulk Approve</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p id="bulkApproveSummary" style="font-size:13px;margin-bottom:8px;"></p>
+                        <ul id="bulkApproveFlaggedList" style="font-size:13px;color:#7F1D1D;margin-bottom:0;"></ul>
+                      </div>
+                      <div class="modal-footer flex-column align-items-stretch gap-2">
+                        <button type="button" class="btn btn-outline-success btn-sm w-100"
+                                onclick="bulkApproveSafeOnly()">Approve yang Aman Saja</button>
+                        <button type="button" class="btn btn-success btn-sm w-100"
+                                onclick="bulkApproveAll()">Approve Semua Tetap</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100"
+                                data-bs-dismiss="modal">Batal</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 @php
                     $from  = $locations->firstItem() ?? 0;
                     $to    = $locations->lastItem()  ?? 0;
@@ -219,6 +320,98 @@
     </div>
 
     <script>
+        /* ---- Data flagged Kategori A (di-render dari PHP, dipakai oleh bulk approve) ---- */
+        window.flaggedLocationsData = @json(
+            $locations->getCollection()
+                ->filter(fn($loc) => count($loc->getCheckFlags()) > 0)
+                ->mapWithKeys(fn($loc) => [$loc->id => $loc->name])
+        );
+
+        /* ---- Globals untuk modal approve individual ---- */
+        var pendingApproveId = null;
+        var bulkAllIds       = [];
+        var bulkFlaggedIds   = [];
+
+        function showApproveConfirm(id, name, reasons) {
+            pendingApproveId = id;
+            document.getElementById('approveConfirmName').textContent = name;
+            var ul = document.getElementById('approveConfirmReasons');
+            ul.innerHTML = '';
+            if (reasons && reasons.length > 0) {
+                reasons.forEach(function(r) {
+                    var li = document.createElement('li');
+                    li.textContent = r;
+                    ul.appendChild(li);
+                });
+            } else {
+                var li = document.createElement('li');
+                li.textContent = 'Perlu diverifikasi lebih lanjut';
+                ul.appendChild(li);
+            }
+            new bootstrap.Modal(document.getElementById('modalApproveConfirm')).show();
+        }
+
+        function confirmApprove() {
+            if (!pendingApproveId) return;
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/pending/' + pendingApproveId + '/approve';
+            var csrf = document.createElement('input');
+            csrf.type = 'hidden'; csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function showBulkApproveConfirm(allIds, flaggedIds, flaggedData) {
+            bulkAllIds    = allIds;
+            bulkFlaggedIds = flaggedIds;
+            document.getElementById('bulkApproveSummary').textContent =
+                'Anda akan approve ' + allIds.length + ' data. ' +
+                flaggedIds.length + ' di antaranya memiliki indikasi yang perlu dicek:';
+            var ul = document.getElementById('bulkApproveFlaggedList');
+            ul.innerHTML = '';
+            flaggedIds.forEach(function(id) {
+                var li = document.createElement('li');
+                li.textContent = flaggedData[id];
+                ul.appendChild(li);
+            });
+            new bootstrap.Modal(document.getElementById('modalBulkApproveConfirm')).show();
+        }
+
+        function bulkApproveAll() {
+            submitBulkIds(bulkAllIds, "{{ route('admin.pending.bulkApprove') }}");
+        }
+
+        function bulkApproveSafeOnly() {
+            var safeIds = bulkAllIds.filter(function(id) {
+                return bulkFlaggedIds.indexOf(id) === -1;
+            });
+            if (safeIds.length === 0) {
+                alert('Tidak ada data aman untuk di-approve. Semua data terpilih memiliki indikasi yang perlu dicek.');
+                return;
+            }
+            submitBulkIds(safeIds, "{{ route('admin.pending.bulkApprove') }}");
+        }
+
+        function submitBulkIds(ids, actionUrl) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = actionUrl;
+            var csrf = document.createElement('input');
+            csrf.type = 'hidden'; csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+            ids.forEach(function(id) {
+                var input = document.createElement('input');
+                input.type = 'hidden'; input.name = 'selected[]'; input.value = id;
+                form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             /* ---- History fetch saat modal dibuka ---- */
             document.querySelectorAll('[id^="modalDetail"]').forEach(function(modalEl) {
@@ -273,6 +466,16 @@
                             '<div style="color:#C02016;font-size:12px;text-align:center;">' +
                             'Gagal memuat riwayat.</div>';
                     });
+                });
+            });
+
+            /* ---- Tombol Approve individual untuk baris flagged Kategori A ---- */
+            document.querySelectorAll('.btn-approve-flagged').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var id      = this.dataset.id;
+                    var name    = this.dataset.name;
+                    var reasons = JSON.parse(this.dataset.reasons || '[]');
+                    showApproveConfirm(id, name, reasons);
                 });
             });
 
@@ -336,7 +539,17 @@
                 if (e.target.classList.contains('row-check')) updateSelectedUI();
             });
 
-            btnApprove?.addEventListener('click', () => submitBulk("{{ route('admin.pending.bulkApprove') }}"));
+            btnApprove?.addEventListener('click', () => {
+                var selectedIds  = getSelectedIds();
+                var flaggedData  = window.flaggedLocationsData || {};
+                var flaggedSelected = selectedIds.filter(id => flaggedData[id] !== undefined);
+
+                if (flaggedSelected.length === 0) {
+                    submitBulk("{{ route('admin.pending.bulkApprove') }}");
+                    return;
+                }
+                showBulkApproveConfirm(selectedIds, flaggedSelected, flaggedData);
+            });
             btnReject?.addEventListener('click',  () => submitBulk("{{ route('admin.pending.bulkReject') }}", 'Reject semua item terpilih? Data akan dihapus.'));
 
             if (perPageSelect && perPageForm) {
