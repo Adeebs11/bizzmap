@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.81.1/L.Control.Locate.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.81.1/L.Control.Locate.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-search/dist/leaflet-search.min.css" />
   <script src="https://unpkg.com/leaflet-search/dist/leaflet-search.min.js"></script>
   <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}" />
@@ -377,6 +379,30 @@
     }
     #btnKecamatan:hover { background: #FFF0EF; }
 
+    /* Tombol Lokasi Saya */
+    #btnLocateMe {
+      padding: 5px 12px;
+      border: 1.5px solid #C02016;
+      border-radius: 16px;
+      background: white;
+      color: #C02016;
+      font-family: 'Poppins', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: absolute;
+      bottom: 105px;
+      right: 60px;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #btnLocateMe:hover { background: #FFF0EF; }
+    #btnLocateMe:disabled { opacity: 0.65; cursor: not-allowed; }
+
     /* Legenda peta — override body color:white */
     #legendMap, #legendMap div, #legendMap span {
       color: #222222;
@@ -406,6 +432,9 @@
       </button>
       <button id="btnKecamatan" title="Tampilkan/sembunyikan batas kecamatan">
         🗺️ Batas Kecamatan
+      </button>
+      <button id="btnLocateMe" title="Temukan posisi saya saat ini">
+        📍 Lokasi Saya
       </button>
 
       <!-- Legenda Peta -->
@@ -809,6 +838,133 @@
     document.getElementById('btnKecamatan').addEventListener('click', toggleKecamatan);
 
     initKecamatan();
+
+    /* ========================
+       Fitur Lokasi Saya (GPS)
+       ======================== */
+    var userLocationMarker = null;
+    var userLocationCircle = null;
+    var isLocating = false;
+
+    var userLocationIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:18px;height:18px;' +
+            'background:#3B82F6;border-radius:50%;' +
+            'border:3px solid white;' +
+            'box-shadow:0 0 0 2px rgba(59,130,246,0.5);' +
+            'animation:pulseLocation 2s infinite;"></div>' +
+            '<style>' +
+            '@keyframes pulseLocation {' +
+            '  0%  { box-shadow: 0 0 0 2px rgba(59,130,246,0.5); }' +
+            '  70% { box-shadow: 0 0 0 14px rgba(59,130,246,0); }' +
+            '  100%{ box-shadow: 0 0 0 2px rgba(59,130,246,0); }' +
+            '}</style>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+    function locateMe() {
+      if (isLocating) return;
+
+      var btn = document.getElementById('btnLocateMe');
+
+      if (!navigator.geolocation) {
+        showSubmitPopup('Browser Anda tidak mendukung fitur lokasi GPS.', 'danger');
+        return;
+      }
+
+      isLocating = true;
+      btn.innerHTML = '⏳ Mencari lokasi...';
+      btn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          var lat      = position.coords.latitude;
+          var lng      = position.coords.longitude;
+          var accuracy = position.coords.accuracy;
+
+          // Hapus layer lokasi user sebelumnya
+          if (userLocationMarker) map.removeLayer(userLocationMarker);
+          if (userLocationCircle) map.removeLayer(userLocationCircle);
+
+          // Lingkaran radius akurasi GPS
+          userLocationCircle = L.circle([lat, lng], {
+            radius:      accuracy,
+            color:       '#3B82F6',
+            fillColor:   '#3B82F6',
+            fillOpacity: 0.12,
+            weight:      1.5
+          }).addTo(map);
+
+          // Marker posisi user
+          userLocationMarker = L.marker([lat, lng], {
+            icon:        userLocationIcon,
+            zIndexOffset: 1000
+          })
+          .bindPopup(
+            '<div style="font-family:Poppins;text-align:center;padding:4px 2px;">' +
+            '<b>📍 Posisi Anda Saat Ini</b><br>' +
+            '<span style="font-size:11px;color:#666;">Akurasi: ± ' +
+            Math.round(accuracy) + ' meter</span></div>'
+          )
+          .addTo(map)
+          .openPopup();
+
+          // Zoom ke posisi user
+          map.setView([lat, lng], 18);
+
+          // Isi otomatis field latitude/longitude di form
+          var latField = document.getElementById('latitude');
+          var lngField = document.getElementById('longitude');
+          if (latField) latField.value = lat.toFixed(8);
+          if (lngField) lngField.value = lng.toFixed(8);
+
+          // Notifikasi
+          if (accuracy > 50) {
+            showSubmitPopup(
+              'Lokasi ditemukan, namun akurasi GPS rendah (± ' +
+              Math.round(accuracy) + 'm). Geser marker manual jika diperlukan.',
+              'warning'
+            );
+          } else {
+            showSubmitPopup(
+              'Lokasi berhasil ditemukan (± ' + Math.round(accuracy) + 'm).',
+              'success'
+            );
+          }
+
+          isLocating = false;
+          btn.innerHTML = '📍 Lokasi Saya';
+          btn.disabled  = false;
+        },
+        function (error) {
+          isLocating = false;
+          btn.innerHTML = '📍 Lokasi Saya';
+          btn.disabled  = false;
+
+          var message = 'Gagal mendapatkan lokasi.';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              message = 'Izin lokasi ditolak. Aktifkan izin lokasi di pengaturan browser.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              message = 'Informasi lokasi tidak tersedia. Pastikan GPS aktif.';
+              break;
+            case error.TIMEOUT:
+              message = 'Waktu pencarian lokasi habis. Coba lagi.';
+              break;
+          }
+          showSubmitPopup(message, 'danger');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout:            15000,
+          maximumAge:         0
+        }
+      );
+    }
+
+    document.getElementById('btnLocateMe').addEventListener('click', locateMe);
 
     /* ========================
        Type / Segment Mapping
