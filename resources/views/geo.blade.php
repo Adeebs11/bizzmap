@@ -516,7 +516,11 @@
             </div>
             <div class="field-group">
               <label for="address">Alamat <span class="req">*</span></label>
-              <input type="text" id="address" name="address" placeholder="Jalan, nomor, kelurahan" required>
+              <input type="text" id="address" name="address"
+                     placeholder="Terisi otomatis, lengkapi dengan detail" required>
+              <small style="color:#888;font-size:11px;display:block;margin-top:2px;">
+                💡 Nama jalan/kelurahan terisi otomatis saat klik peta. Tambahkan nomor atau patokan terdekat.
+              </small>
               <div class="field-error-msg" id="err-address"></div>
             </div>
             <div class="row-fields">
@@ -919,19 +923,18 @@
           if (latField) latField.value = lat.toFixed(8);
           if (lngField) lngField.value = lng.toFixed(8);
 
-          // Notifikasi
+          // Otomatis cari alamat dari lokasi GPS
+          reverseGeocode(lat, lng);
+
+          // Peringatan akurasi rendah (tetap ditampilkan, soal keandalan koordinat)
           if (accuracy > 50) {
             showSubmitPopup(
-              'Lokasi ditemukan, namun akurasi GPS rendah (± ' +
-              Math.round(accuracy) + 'm). Geser marker manual jika diperlukan.',
+              'Akurasi GPS rendah (± ' + Math.round(accuracy) +
+              'm). Geser marker manual jika koordinat meleset.',
               'warning'
             );
-          } else {
-            showSubmitPopup(
-              'Lokasi berhasil ditemukan (± ' + Math.round(accuracy) + 'm).',
-              'success'
-            );
           }
+          // Notifikasi sukses GPS dihapus — digantikan oleh toast dari reverseGeocode
 
           isLocating = false;
           btn.innerHTML = '📍 Lokasi Saya';
@@ -965,6 +968,67 @@
     }
 
     document.getElementById('btnLocateMe').addEventListener('click', locateMe);
+
+    /* ========================
+       Reverse Geocoding (Koordinat → Alamat)
+       ======================== */
+    async function reverseGeocode(lat, lng) {
+      var addressField = document.getElementById('address');
+      if (!addressField) return;
+
+      var originalPlaceholder = addressField.placeholder;
+      addressField.placeholder = 'Mencari alamat...';
+      addressField.disabled = true;
+
+      try {
+        var url = 'https://nominatim.openstreetmap.org/reverse' +
+          '?lat=' + lat +
+          '&lon=' + lng +
+          '&format=json' +
+          '&accept-language=id' +
+          '&zoom=18';
+
+        var response = await fetch(url, {
+          headers: { 'User-Agent': 'BizzMap-PT-Telkom-Jambi' }
+        });
+
+        if (!response.ok) throw new Error('Gagal menghubungi layanan alamat');
+
+        var data = await response.json();
+
+        if (data && data.address) {
+          var addr  = data.address;
+          var parts = [];
+
+          if (addr.road) parts.push(addr.road);
+
+          var kelurahan = addr.village || addr.suburb || addr.neighbourhood || null;
+          if (kelurahan) parts.push('Kel. ' + kelurahan);
+
+          var kecamatan = addr.city_district || addr.suburb || null;
+          if (kecamatan && kecamatan !== kelurahan) parts.push('Kec. ' + kecamatan);
+
+          if (parts.length > 0) {
+            addressField.value = parts.join(', ');
+          } else if (data.display_name) {
+            addressField.value = data.display_name.split(',').slice(0, 4).join(',').trim();
+          }
+
+          showSubmitPopup(
+            'Alamat ditemukan otomatis. Silakan lengkapi dengan detail lokasi (nomor, patokan, dll).',
+            'success'
+          );
+        } else {
+          showSubmitPopup('Alamat tidak ditemukan otomatis untuk lokasi ini. Mohon isi manual.', 'warning');
+        }
+      } catch (error) {
+        console.warn('Reverse geocoding gagal:', error);
+        showSubmitPopup('Gagal mengambil alamat otomatis. Mohon isi manual.', 'warning');
+      } finally {
+        addressField.disabled = false;
+        addressField.placeholder = originalPlaceholder;
+      }
+    }
 
     /* ========================
        Type / Segment Mapping
@@ -1040,8 +1104,13 @@
        Map Click → Fill Coords
        ======================== */
     map.on('click', function (e) {
-      document.getElementById('latitude').value  = e.latlng.lat;
-      document.getElementById('longitude').value = e.latlng.lng;
+      var lat = e.latlng.lat;
+      var lng = e.latlng.lng;
+      document.getElementById('latitude').value  = lat;
+      document.getElementById('longitude').value = lng;
+
+      // Otomatis cari alamat dari koordinat yang baru diklik
+      reverseGeocode(lat, lng);
     });
 
     /* ========================
