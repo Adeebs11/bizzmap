@@ -75,14 +75,19 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // keamanan: jangan biarkan admin menghapus dirinya sendiri
+        // keamanan: jangan biarkan siapapun menghapus dirinya sendiri
         if (auth()->id() === $user->id) {
             return redirect()->back()->with('error', 'Anda tidak bisa menghapus akun sendiri.');
         }
 
-        // opsional: jangan hapus admin lain
+        // akun admin tidak bisa dihapus
         if ($user->role === 'admin') {
             return redirect()->back()->with('error', 'Akun admin tidak bisa dihapus.');
+        }
+
+        // AR hanya boleh hapus akun role 'sa'
+        if (auth()->user()->role === 'ar' && $user->role !== 'sa') {
+            return redirect()->back()->with('error', 'AR hanya bisa menghapus akun dengan role SA.');
         }
 
         $user->delete();
@@ -101,8 +106,13 @@ class AdminController extends Controller
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|min:6',
-                'role' => 'required|in:admin,user',
+                'role' => 'required|in:admin,sa,ar',
             ]);
+
+            // AR hanya boleh membuat akun dengan role 'sa'
+            if (auth()->user()->role === 'ar' && $request->role !== 'sa') {
+                return back()->with('error', 'AR hanya bisa membuat akun dengan role SA.');
+            }
 
             User::create([
                 'name' => $request->name,
@@ -118,13 +128,20 @@ class AdminController extends Controller
         public function updateUserRole(Request $request, $id)
         {
             $request->validate([
-                'role' => 'required|in:admin,user'
+                'role' => 'required|in:admin,sa,ar'
             ]);
 
             $user = User::findOrFail($id);
 
             if ($user->id === auth()->id()) {
                 return back()->with('error', 'Tidak bisa mengubah role akun sendiri.');
+            }
+
+            // AR hanya boleh ubah role akun yang sudah 'sa', dan hanya ke 'sa'
+            if (auth()->user()->role === 'ar') {
+                if ($user->role !== 'sa' || $request->role !== 'sa') {
+                    return back()->with('error', 'AR hanya bisa mengelola akun dengan role SA.');
+                }
             }
 
             $user->role = $request->role;
@@ -146,11 +163,22 @@ class AdminController extends Controller
             $request->validate([
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'role' => 'required|in:admin,user',
+                'role' => 'required|in:admin,sa,ar',
                 'password' => 'nullable|min:6',
             ]);
 
-            // Hindari kamu “ngunci diri sendiri” jadi user
+            // AR hanya boleh edit akun yang SAAT INI role-nya 'sa',
+            // dan tidak boleh mengubah role target jadi selain 'sa'
+            if (auth()->user()->role === 'ar') {
+                if ($user->role !== 'sa') {
+                    return back()->with('error', 'AR hanya bisa mengedit akun dengan role SA.');
+                }
+                if ($request->role !== 'sa') {
+                    return back()->with('error', 'AR hanya bisa menetapkan role SA pada akun yang dikelolanya.');
+                }
+            }
+
+            // Hindari admin “ngunci diri sendiri” jadi bukan admin
             if ($user->id === auth()->id() && $request->role !== 'admin') {
                 return back()->with('error', 'Tidak bisa menurunkan role akun admin yang sedang login.');
             }

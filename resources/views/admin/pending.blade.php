@@ -18,6 +18,12 @@
         <h3 class="mb-0">Data Pending</h3>
     </div>
 
+    <div style="background:#EFF6FF;border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:13px;color:#1E40AF;">
+        👤 Anda login sebagai
+        <strong>{{ auth()->user()->role === 'admin' ? 'Admin' : 'AR (Account Representative)' }}</strong>
+        — bisa memverifikasi (approve/reject) data pelanggan dan non-pelanggan.
+    </div>
+
     <div class="d-flex align-items-center gap-2 mb-3">
         <span class="text-muted">
             Item selected: <strong id="selectedCount">0</strong>

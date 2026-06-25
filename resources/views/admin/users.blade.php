@@ -7,9 +7,16 @@
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h3 class="mb-0">Kelola User</h3>
 
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-            + Add New
-        </a>
+        <div class="text-end">
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
+                + Add New
+            </a>
+            @if(auth()->user()->role === 'ar')
+            <div style="font-size:12px;color:#888;margin-top:4px;">
+                ℹ️ Sebagai AR, Anda hanya dapat membuat dan mengelola akun dengan role SA.
+            </div>
+            @endif
+        </div>
     </div>
 
     @if(session('success'))
@@ -52,23 +59,36 @@
                                     <td>{{ $u->name }}</td>
                                     <td>{{ $u->email }}</td>
                                     <td>
-                                        <span class="badge {{ $u->role === 'admin' ? 'text-bg-warning' : 'text-bg-secondary' }}">
-                                            {{ $u->role }}
-                                        </span>
+                                        @if($u->role === 'admin')
+                                            <span class="badge text-bg-warning">Admin</span>
+                                        @elseif($u->role === 'ar')
+                                            <span class="badge text-bg-primary">AR</span>
+                                        @else
+                                            <span class="badge text-bg-secondary">SA</span>
+                                        @endif
                                     </td>
                                     <td>{{ $u->created_at?->format('Y-m-d') }}</td>
                                     <td class="d-flex gap-2">
-                                        <a href="{{ route('admin.users.edit', $u->id) }}" class="btn btn-success btn-sm">Edit</a>
+                                        @php
+                                            $canManage = auth()->user()->role === 'admin'
+                                                || (auth()->user()->role === 'ar' && $u->role === 'sa');
+                                        @endphp
 
-                                        @if($u->role === 'admin')
-                                            <button class="btn btn-outline-secondary btn-sm" disabled>Protected</button>
+                                        @if($canManage)
+                                            <a href="{{ route('admin.users.edit', $u->id) }}" class="btn btn-success btn-sm">Edit</a>
+
+                                            @if($u->role === 'admin')
+                                                <button class="btn btn-outline-secondary btn-sm" disabled>Protected</button>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.users.delete', $u->id) }}"
+                                                    onsubmit="return confirm('Yakin hapus user ini?');" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                                                </form>
+                                            @endif
                                         @else
-                                            <form method="POST" action="{{ route('admin.users.delete', $u->id) }}"
-                                                onsubmit="return confirm('Yakin hapus user ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
-                                            </form>
+                                            <span class="badge text-bg-light text-muted border">Tidak ada akses</span>
                                         @endif
                                     </td>
 

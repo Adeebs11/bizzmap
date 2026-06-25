@@ -34,6 +34,9 @@ Route::get('/admin-test', function () {
     return 'Admin OK';
 })->middleware(['auth', 'admin']);
 
+// Semua halaman admin: bisa diakses admin DAN ar
+// (AdminMiddleware kini mengizinkan role 'admin' dan 'ar')
+// Batasan AR per-aksi ditangani di controller, bukan di route
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
