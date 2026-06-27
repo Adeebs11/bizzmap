@@ -1,6 +1,6 @@
 body, html {
     height: 100%;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #f5f5f5; /* Update background color */
 }
 
@@ -97,11 +97,14 @@ h1 {
 }
 
 .col-md-3 {
-    background-color: #C02016;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     margin: 5px auto;
     width: 250px;
     padding: 20px;
+}
+
+/* Override: shadow netral untuk 4 kartu statistik Demografi saja */
+#stat-cards-row .col-md-3 {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
 .info-box {
@@ -318,5 +321,138 @@ canvas {
     }
     .segment-icon {
         font-size: 20px !important;
+    }
+}
+
+/* ===== HEADER MOBILE — red bar dengan back button + judul ===== */
+@media (max-width: 768px) {
+
+    /* Wrapper jadi flex row merah, melebar ke kanan (negatif margin
+       mengimbangi .container padding: 12px dari blok mobile di atas) */
+    #demografi-header {
+        background-color: #C02016 !important;
+        padding: 14px 16px !important;
+        margin: -12px -12px 16px -12px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        border-radius: 0 !important;
+    }
+
+    /* Hapus margin bawah dari d-flex wrapper (tidak perlu di dalam header merah) */
+    #demografi-header .d-flex.justify-content-between {
+        margin-bottom: 0 !important;
+        flex: none !important;
+    }
+
+    /* Back button: lingkaran semi-transparan putih */
+    #demografi-header .btn-light {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        background-color: rgba(255, 255, 255, 0.18) !important;
+        border: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Ikon panah putih */
+    #demografi-header .btn-light i {
+        font-size: 16px !important;
+        color: #fff !important;
+        margin-right: 0 !important;
+    }
+
+    /* h1 jadi teks judul inline di header merah */
+    #demografi-header h1 {
+        color: #fff !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        text-align: left !important;
+        flex: 1 !important;
+    }
+}
+
+/* ===== LANGKAH 1: KARTU STATISTIK ===== */
+@media (max-width: 768px) {
+
+    /* Row jadi CSS grid 2 kolom — lepas dari Bootstrap flex/gutter */
+    #stat-cards-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* Kolom Bootstrap menjadi grid item — reset lebar & padding gutter */
+    #stat-cards-row .col-6 {
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    /* Card inner div: padding & border-radius lebih kompak */
+    #stat-cards-row .col-6 > div {
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
+    }
+
+    /* Angka (div pertama setelah ikon) */
+    #stat-cards-row .col-6 > div > div:nth-of-type(1) {
+        font-size: 20px !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Label (div kedua) */
+    #stat-cards-row .col-6 > div > div:nth-of-type(2) {
+        font-size: 11px !important;
+    }
+}
+
+/* ===== LANGKAH 3: DIVIDER "ANALISIS DETAIL" ===== */
+@media (max-width: 768px) {
+
+    #analisis-detail-section > h6 {
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        text-transform: none !important;
+        color: #5F5E5A !important;
+        margin: 14px 2px 8px !important;
+        border-left: none !important;
+        border-bottom: none !important;
+        padding: 0 !important;
+    }
+}
+
+/* ===== LANGKAH 4: CARD OMSET, PAKET, BIDANG BISNIS ===== */
+@media (max-width: 768px) {
+
+    /* Scope ke #analisis-detail-section agar carousel card tidak ikut */
+    #analisis-detail-section .chart-card {
+        border: 0.5px solid #ddd !important;
+        border-radius: 12px !important;
+        padding: 14px !important;
+        box-shadow: none !important;
+        margin-bottom: 10px !important;
+        min-height: auto !important;
+        height: auto !important;
+    }
+
+    /* Judul chart dalam card (inline-styled h6) */
+    #analisis-detail-section .chart-card > h6 {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        margin-bottom: 10px !important;
     }
 }
