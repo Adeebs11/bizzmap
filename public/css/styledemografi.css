@@ -235,3 +235,88 @@ canvas {
     background-color: #ff002f;
     color: #ffffff;
 }
+
+/* ===== MOBILE RESPONSIVE (max-width: 768px) ===== */
+@media (max-width: 768px) {
+
+    /* 1: Sembunyikan sidebar, container ambil penuh */
+    .sidebar {
+        display: none !important;
+    }
+    .container {
+        margin-left: 0 !important;
+        padding: 12px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* 2: Header — back button jadi lingkaran icon-only, h1 lebih kecil */
+    .d-flex.justify-content-between.mb-4 .btn-light {
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+        min-width: unset !important;
+        flex-shrink: 0 !important;
+    }
+    .d-flex.justify-content-between.mb-4 .btn-light i {
+        font-size: 16px !important;
+        margin-right: 0 !important;
+    }
+    h1 {
+        font-size: 18px !important;
+        width: 90% !important;
+        padding: 10px 0 !important;
+        margin-top: 8px !important;
+        margin-bottom: 16px !important;
+    }
+
+    /* 3: Stat cards — reset width 250px yang di-hardcode di desktop
+          col-6 dari Bootstrap sudah ada → otomatis jadi 2 kolom */
+    .col-md-3 {
+        width: 50% !important;
+        max-width: 50% !important;
+    }
+
+    /* 4: Carousel — tombol prev/next lebih mudah disentuh */
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 40px !important;
+        height: 40px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    /* 5: Chart cards — padding lebih rapat di mobile */
+    .chart-card {
+        padding: 10px !important;
+        margin-bottom: 12px !important;
+    }
+    canvas {
+        padding: 8px !important;
+    }
+
+    /* 6: Tren chart — batasi tinggi agar tidak terlalu panjang */
+    #chartTren {
+        max-height: 200px !important;
+    }
+
+    /* Segment badge wrapper — pastikan tidak meluber */
+    .segment-badge-wrapper {
+        margin-top: 12px !important;
+        padding: 0 4px !important;
+    }
+    .segment-badge {
+        font-size: 11px !important;
+        padding: 3px 8px !important;
+    }
+    .segment-icon {
+        font-size: 20px !important;
+    }
+}
