@@ -413,6 +413,266 @@
       width: auto;
       display: inline-block;
     }
+
+    /* Drag handle: hidden on desktop, shown on mobile via media query */
+    .mobile-drag-handle { display: none; }
+
+    /* FAB Tambah Lokasi: hidden on desktop */
+    #btnOpenSidebar { display: none; }
+
+    /* ========================
+       Mobile Responsive (≤768px)
+       ======================== */
+    @media (max-width: 768px) {
+      /* Remove red frame — map fills full screen */
+      .container-fluid {
+        background-color: transparent !important;
+        flex-direction: column !important;
+      }
+      .map-wrapper {
+        padding: 0 !important;
+        background-color: transparent !important;
+        position: fixed !important;
+        inset: 0 !important;
+        flex: none !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 1 !important;
+      }
+      #map {
+        position: absolute !important;
+        inset: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+      }
+
+      /* Sidebar → bottom sheet */
+      .sidebar {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 82vh !important;
+        flex: none !important;
+        z-index: 2000 !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.22) !important;
+        overflow: hidden !important;
+      }
+      .sidebar.mobile-open {
+        transform: translateY(0) !important;
+      }
+
+      /* FAB Tambah Lokasi — only on mobile */
+      #btnOpenSidebar {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 80px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 1500 !important;
+        background: linear-gradient(135deg, #C02016, #E8453C) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 24px !important;
+        padding: 12px 22px !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 16px rgba(192,32,22,0.35) !important;
+        align-items: center !important;
+        gap: 8px !important;
+        white-space: nowrap !important;
+      }
+      #btnOpenSidebar.hidden-fab {
+        display: none !important;
+      }
+
+      /* Drag handle visible on mobile */
+      .mobile-drag-handle {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 8px 0 4px !important;
+        cursor: pointer !important;
+        background: white !important;
+        flex-shrink: 0 !important;
+      }
+      .mobile-drag-handle-bar {
+        width: 40px !important;
+        height: 4px !important;
+        background: #ddd !important;
+        border-radius: 2px !important;
+      }
+
+      /* Header tappable to toggle */
+      .sidebar-header { cursor: pointer !important; }
+
+      /* ── Zoom control: geser ke bawah tombol back ── */
+      .leaflet-control-zoom {
+        position: fixed !important;
+        top: 56px !important;
+        left: 10px !important;
+        right: auto !important;
+        bottom: auto !important;
+        z-index: 1400 !important;
+      }
+
+      /* ── Search: tampilkan di sebelah kanan tombol back ── */
+      .leaflet-control-search {
+        position: fixed !important;
+        top: 10px !important;
+        left: 56px !important;
+        right: auto !important;
+        bottom: auto !important;
+        z-index: 1600 !important;
+      }
+      .leaflet-control-search .search-button {
+        width: 36px !important;
+        height: 36px !important;
+        background-color: white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+      }
+      .leaflet-control-search .search-input {
+        max-width: 200px !important;
+      }
+
+      /* ── Tombol back ── */
+      .back-button {
+        z-index: 3000 !important;
+        top: 14px !important;
+        left: 14px !important;
+      }
+
+      /* ── Toolbar kanan: Layer → Upload → Download → Kecamatan ──
+         Jarak: top[n+1] = top[n] + 36 (height) + 10 (gap) = top[n] + 46
+         Layer:10  Upload:56  Download:102  Kecamatan:148
+         Verifikasi no-overlap: 46<56 ✓  92<102 ✓  138<148 ✓        ── */
+      .leaflet-control-layers {
+        position: fixed !important;
+        top: 10px !important;
+        right: 10px !important;
+        left: auto !important;
+        bottom: auto !important;
+        z-index: 1500 !important;
+        margin: 0 !important;
+      }
+      .leaflet-control-layers-toggle {
+        width: 36px !important;
+        height: 36px !important;
+        background-size: 20px 20px !important;
+      }
+      .upload-button {
+        position: fixed !important;
+        top: 56px !important;
+        right: 10px !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1500 !important;
+      }
+      .upload-button i { font-size: 17px !important; }
+      .download-button {
+        position: fixed !important;
+        top: 102px !important;
+        right: 10px !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1500 !important;
+      }
+      .download-button i { font-size: 17px !important; }
+      #btnKecamatan {
+        position: fixed !important;
+        top: 148px !important;
+        right: 10px !important;
+        bottom: auto !important;
+        left: auto !important;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0 !important;
+        white-space: nowrap !important;
+        z-index: 1500 !important;
+        overflow: hidden !important;
+      }
+      #btnKecamatan::before {
+        content: "🗺️";
+        font-size: 17px !important;
+      }
+
+      /* ── GPS button: bulat kecil pojok kanan bawah ── */
+      #btnLocateMe {
+        position: fixed !important;
+        bottom: 24px !important;
+        right: 16px !important;
+        top: auto !important;
+        left: auto !important;
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0 !important;
+        z-index: 1500 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        overflow: hidden !important;
+      }
+      #btnLocateMe::before {
+        content: "📍";
+        font-size: 20px !important;
+      }
+
+      /* ── Sembunyikan legenda di mobile ── */
+      #legendMap { display: none !important; }
+
+      /* ── Toast: selalu di atas semua elemen (termasuk sidebar) ── */
+      .toast-container {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        max-width: calc(100% - 20px) !important;
+        z-index: 9999 !important;
+      }
+      #submitToast { width: 100% !important; }
+
+      /* Panel layer control saat expanded */
+      .leaflet-control-layers-expanded {
+        max-width: 200px !important;
+      }
+
+      /* Form fields: stack lat/lng row vertically */
+      .row-fields {
+        flex-direction: column !important;
+        gap: 4px !important;
+      }
+    }
   </style>
 </head>
 
@@ -465,9 +725,18 @@
           <span style="color:#222222 !important;">Potensial ⭐</span>
         </div>
       </div>
+      <!-- Mobile FAB: buka panel Tambah Lokasi (hidden on desktop) -->
+      <button id="btnOpenSidebar">
+        <i class="fa-solid fa-plus"></i> Tambah Lokasi
+      </button>
     </div>
 
     <div class="sidebar">
+      <!-- Mobile drag handle (hidden on desktop) -->
+      <div class="mobile-drag-handle" id="mobileDragHandle">
+        <div class="mobile-drag-handle-bar"></div>
+      </div>
+
       <!-- Header bar -->
       <div class="sidebar-header">
         <button class="home-btn-sidebar" onclick="redirectToMenu()" title="Kembali ke Menu">
@@ -634,19 +903,20 @@
 
       </div><!-- /.sidebar-scroll-area -->
 
-      <!-- Toast notification -->
-      <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 3000;">
-        <div id="submitToast" class="toast toast-redesigned" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-inner">
-            <div class="toast-icon-wrap" id="toastIconWrap"></div>
-            <div class="toast-msg" id="submitToastMsg">Pesan...</div>
-            <button type="button" class="btn-close toast-dismiss" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>
-
     </div><!-- /.sidebar -->
   </div><!-- /.container-fluid -->
+
+  <!-- Toast notification — di luar container-fluid agar tidak terpengaruh
+       transform: translateY pada .sidebar di mode mobile -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 3000;">
+    <div id="submitToast" class="toast toast-redesigned" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-inner">
+        <div class="toast-icon-wrap" id="toastIconWrap"></div>
+        <div class="toast-msg" id="submitToastMsg">Pesan...</div>
+        <button type="button" class="btn-close toast-dismiss" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
 
   <script>
     /* ========================
@@ -713,10 +983,34 @@
       popupAnchor: [0, -34]
     });
 
-    L.control.layers({
+    var layerControl = L.control.layers({
       "Default": osm,
       "Satellite": Esri_WorldImagery_With_Labels
     }).addTo(map);
+
+    /* ========================
+       Mobile: Layer Control tap fix
+       (desktop pakai hover, mobile tidak punya hover)
+       ======================== */
+    (function () {
+      if (window.innerWidth > 768) return;
+
+      var layersToggle   = document.querySelector('.leaflet-control-layers-toggle');
+      var layersContainer = document.querySelector('.leaflet-control-layers');
+      if (!layersToggle || !layersContainer) return;
+
+      layersToggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        layersContainer.classList.toggle('leaflet-control-layers-expanded');
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!layersContainer.contains(e.target)) {
+          layersContainer.classList.remove('leaflet-control-layers-expanded');
+        }
+      });
+    })();
 
     var markerGroup = L.layerGroup().addTo(map);
 
@@ -1774,6 +2068,69 @@
       markerGroup.clearLayers();
       localStorage.removeItem('markers');
     }
+
+    /* ========================
+       Mobile Bottom Sheet
+       ======================== */
+    (function () {
+      var sidebar = document.querySelector('.sidebar');
+      var handle  = document.getElementById('mobileDragHandle');
+      var header  = document.querySelector('.sidebar-header');
+      var fab     = document.getElementById('btnOpenSidebar');
+      if (!sidebar || !handle || !header) return;
+
+      function isMobile() { return window.innerWidth <= 768; }
+
+      function openSidebar() {
+        sidebar.classList.add('mobile-open');
+        if (fab) fab.classList.add('hidden-fab');
+        map.invalidateSize();
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('mobile-open');
+        if (fab && isMobile()) fab.classList.remove('hidden-fab');
+        map.invalidateSize();
+      }
+      function toggleSidebar() {
+        if (sidebar.classList.contains('mobile-open')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      }
+
+      // FAB button opens the panel
+      if (fab) {
+        fab.addEventListener('click', function () {
+          if (isMobile()) openSidebar();
+        });
+      }
+
+      // Drag handle + header tap toggles
+      handle.addEventListener('click', function () {
+        if (isMobile()) toggleSidebar();
+      });
+      header.addEventListener('click', function () {
+        if (isMobile()) toggleSidebar();
+      });
+
+      // Swipe up to open, swipe down to close
+      var touchStartY = 0;
+      sidebar.addEventListener('touchstart', function (e) {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      sidebar.addEventListener('touchend', function (e) {
+        if (!isMobile()) return;
+        var delta = e.changedTouches[0].clientY - touchStartY;
+        if (delta >  60) closeSidebar();
+        if (delta < -60) openSidebar();
+      }, { passive: true });
+
+      // Tap on map closes the sheet
+      document.getElementById('map').addEventListener('click', function () {
+        if (isMobile()) closeSidebar();
+      });
+    })();
   </script>
 
   <!-- Modal Peringatan Duplikat -->
