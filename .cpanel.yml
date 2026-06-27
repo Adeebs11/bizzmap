@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/bizzmapw/public_html/
+    - /bin/cp -r $REPOPATH/public/css $DEPLOYPATH
+    - /bin/cp -r $REPOPATH/public/js $DEPLOYPATH
+    - /bin/cp -r $REPOPATH/public/img $DEPLOYPATH
