@@ -6,6 +6,7 @@
     <title>Demografi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/styledemografi.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,12 +28,14 @@
             </ul>
         </div>
         <div class="container mt-5" id="main-content">
-            <div class="d-flex justify-content-between mb-4">
-                <a href="javascript:history.back()" class="btn btn-light">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
+            <div id="demografi-header">
+                <div class="d-flex justify-content-between mb-4">
+                    <a href="javascript:history.back()" class="btn btn-light">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+                <h1 class="text-center mb-5">DEMOGRAFI</h1>
             </div>
-            <h1 class="text-center mb-5">DEMOGRAFI</h1>
 
             @php
             $totalAll = (int)$customerTotal + (int)$nonCustomerTotal;
@@ -49,7 +52,7 @@
             @endif
 
             {{-- 4 Kartu Statistik --}}
-            <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4" id="stat-cards-row">
               @php
                 $statCards = [
                     ['icon'=>'fa-map-marker-alt','label'=>'Total Lokasi',
@@ -211,7 +214,7 @@
             @endif
 
             {{-- P3B: Analisis Detail — Omset, Paket, Bidang Bisnis --}}
-            <div style="margin-top:28px;">
+            <div style="margin-top:28px;" id="analisis-detail-section">
                 <h6 style="font-weight:700;color:#111;margin-bottom:16px;
                            border-left:3px solid #C02016;padding-left:10px;">
                     Analisis Detail
@@ -366,6 +369,7 @@
         const pieOptions = {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '60%',
             plugins: {
                 tooltip: {
                     callbacks: {
@@ -373,7 +377,7 @@
                     }
                 },
                 legend: {
-                    position: 'bottom'
+                    position: 'right'
                 }
             }
         };
