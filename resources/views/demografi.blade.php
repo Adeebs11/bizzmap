@@ -30,8 +30,9 @@
         <div class="container mt-5" id="main-content">
             <div id="demografi-header">
                 <div class="d-flex justify-content-between mb-4">
-                    <a href="javascript:history.back()" class="btn btn-light">
-                        <i class="fas fa-arrow-left"></i> Back
+                    <a href="javascript:history.back()" class="btn btn-light back-button">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="back-button-text">Back</span>
                     </a>
                 </div>
                 <h1 class="text-center mb-5">DEMOGRAFI</h1>
