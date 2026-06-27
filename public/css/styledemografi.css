@@ -253,7 +253,28 @@ canvas {
         width: 100% !important;
     }
 
-    /* 2: Header — back button jadi lingkaran icon-only, h1 lebih kecil */
+    /* 2: Back button: lingkaran semi-transparan, teks disembunyikan */
+    .back-button {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        background-color: rgba(255, 255, 255, 0.18) !important;
+        border: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .back-button i {
+        color: #fff !important;
+        font-size: 16px !important;
+        margin-right: 0 !important;
+    }
+    .back-button-text {
+        display: none;
+    }
+
+    /* Header — back button via selector lama (fallback) + h1 lebih kecil */
     .d-flex.justify-content-between.mb-4 .btn-light {
         width: 36px !important;
         height: 36px !important;
