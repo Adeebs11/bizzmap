@@ -1076,8 +1076,7 @@
 
               layer.on('mouseover', function () {
                 layer.setStyle({ fillOpacity: 0.40, weight: 2.5, color: '#C02016' });
-                layer.bringToFront();
-                if (markerGroup) markerGroup.bringToFront();
+                layer.bringToBack();
               });
 
               layer.on('mouseout', function () {
