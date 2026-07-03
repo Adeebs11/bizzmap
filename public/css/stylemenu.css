@@ -725,4 +725,49 @@ body {
         flex-direction: column;
         text-align: center;
     }
+
+    /* Sembunyikan deskripsi dan badge card di mobile */
+    .card-desc {
+        display: none !important;
+    }
+    .badge-nav {
+        display: none !important;
+    }
+
+    /* Kompakkan card hero (Peta) */
+    .card-hero {
+        min-height: 140px !important;
+        padding: 18px !important;
+    }
+
+    /* Kompakkan card kecil (Demografi & Analytics) */
+    .card-sm {
+        min-height: 90px !important;
+        padding: 14px !important;
+    }
+
+    /* Ikon lebih kecil di mobile */
+    .card-icon {
+        width: 36px !important;
+        height: 36px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Judul lebih kecil di mobile */
+    .card-title-big {
+        font-size: 16px !important;
+        margin-bottom: 0 !important;
+    }
+    .card-title-sm {
+        font-size: 13px !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Kurangi margin footer card */
+    .card-footer {
+        margin-top: 12px !important;
+    }
+    .card-footer-sm {
+        margin-top: 10px !important;
+    }
 }
