@@ -10,6 +10,7 @@
 
 </head>
 <body>
+@include('partials.loading-screen')
     @php
         $segMap = collect($segmentAnalytics ?? [])->keyBy('segment');
 

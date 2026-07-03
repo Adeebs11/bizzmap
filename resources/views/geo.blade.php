@@ -677,6 +677,7 @@
 </head>
 
 <body>
+@include('partials.loading-screen')
   <div class="container-fluid">
     <div class="map-wrapper">
       <div id="map"></div>

@@ -18,6 +18,7 @@
 
 </head>
 <body>
+@include('partials.loading-screen')
     <div class="d-flex">
         <div class="sidebar">
             <h2>Menu</h2>

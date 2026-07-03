@@ -31,6 +31,7 @@
 
 </head>
 <body class="bg-light">
+@include('partials.loading-screen')
 
 <div class="d-flex">
     {{-- Sidebar --}}
