@@ -1,92 +1,728 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 body {
-    background: url('https://www.dexigner.com/images/article/26277/Telkom_Landmark_Tower_01.jpg') no-repeat center center fixed;
-    background-size: cover; /* Menyesuaikan gambar dengan ukuran halaman */
     font-family: 'Poppins', sans-serif;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    /* backdrop-filter: blur(5px); */
-}
-
-.header {
-    background-color: #C02016;
+    background: #0a0f1e;
     color: #ffffff;
-    text-align: center;
-    padding: 20px 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    margin-bottom: 20px;
-    position: relative; /* Add this */
+    overflow-x: hidden;
 }
 
-.navbar {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+/* ===== TOPBAR ===== */
+.topbar {
+    background: #C02016;
+    padding: 13px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
-
-
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.topbar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.topbar-name {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    color: #fff;
+}
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.topbar-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .btn-logout {
-    background-color: #ffffff;
-    border: none;
-    color: #d32d21 !important; /* Menambahkan !important */
-    padding: 8px 16px;
-    font-weight: 700;
-    border-radius: 25px;
-    margin-top: -2px;
-    margin-right: 20px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-
-.btn-logout:hover {
-    background-color: #b7b7b7;
-    transform: scale(1.05);
-}
-
-.header a {
-    text-decoration: none;
-    color: inherit; /* Menggunakan warna teks yang diwariskan */
-}
-
-.header a:hover {
-    text-decoration: none; /* Menghilangkan underline saat hover */
-    color: inherit; /* Menggunakan warna teks yang diwariskan */
-}
-
-.header h1 {
-    margin: 0;
-    font-size: 2.5rem;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
     font-family: 'Poppins', sans-serif;
-    font-weight: 600;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+.btn-logout:hover {
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+    text-decoration: none;
 }
 
-.menu-card {
-    margin-top: 50%;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: none;
-    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);;
+/* ===== HERO SECTION ===== */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 32px 40px;
+    overflow: hidden;
+}
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://www.dexigner.com/images/article/26277/Telkom_Landmark_Tower_01.jpg') center/cover;
+    opacity: 0.15;
+    z-index: 0;
+}
+.hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        rgba(10,15,30,0.92) 0%,
+        rgba(13,26,58,0.88) 60%,
+        rgba(10,22,40,0.92) 100%);
+    z-index: 1;
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+}
+.hero-eyebrow {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.hero-title {
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+.hero-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    margin-bottom: 32px;
 }
 
-.menu-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+/* ===== CARDS GRID ===== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.card-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.card-nav {
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: transform 0.25s, border-color 0.25s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    color: #fff;
+}
+.card-nav:hover {
+    color: #fff;
+    text-decoration: none;
 }
 
-.card-title {
-    font-weight: bold;
-    color: #C02016;
+/* Radial glow effect on hover */
+.card-nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 16px;
 }
 
-.btn-primary {
-    background-color: #C02016;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+/* Peta card */
+.card-hero {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.card-hero::before {
+    background: radial-gradient(ellipse at 30% 50%,
+        rgba(192,32,22,0.35) 0%, transparent 70%);
+}
+.card-hero:hover::before { opacity: 1; }
+.card-hero:hover {
+    transform: translateY(-3px);
+    border-color: rgba(192,32,22,0.5);
 }
 
-.btn-primary:hover {
-    background-color: #a01c14;
-    transform: scale(1.05);
+/* Demografi card */
+.card-sm {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+}
+.card-demo::before {
+    background: radial-gradient(ellipse at 80% 50%,
+        rgba(55,138,221,0.35) 0%, transparent 70%);
+}
+.card-demo:hover::before { opacity: 1; }
+.card-demo:hover {
+    transform: translateY(-3px);
+    border-color: rgba(55,138,221,0.45);
+}
+
+/* Analytics card */
+.card-ana::before {
+    background: radial-gradient(ellipse at 80% 50%,
+        rgba(29,158,117,0.35) 0%, transparent 70%);
+}
+.card-ana:hover::before { opacity: 1; }
+.card-ana:hover {
+    transform: translateY(-3px);
+    border-color: rgba(29,158,117,0.4);
+}
+
+.card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+}
+.icon-red { background: #C02016; }
+.icon-blue {
+    background: rgba(55,138,221,0.25);
+    border: 1px solid rgba(55,138,221,0.3);
+}
+.icon-teal {
+    background: rgba(29,158,117,0.25);
+    border: 1px solid rgba(29,158,117,0.3);
+}
+.card-title-big {
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+}
+.card-title-sm {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+}
+.card-desc {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+.card-footer-sm {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    position: relative;
+    z-index: 1;
+}
+.badge-nav {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 20px;
+}
+.badge-red {
+    background: rgba(192,32,22,0.25);
+    border: 1px solid rgba(192,32,22,0.4);
+    color: #ff8a80;
+}
+.badge-gray {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.55);
+}
+.arrow-btn {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+}
+.arrow-btn-sm {
+    width: 28px;
+    height: 28px;
+}
+.arrow-red { background: #C02016; }
+.arrow-blue {
+    background: rgba(55,138,221,0.2);
+    border: 1px solid rgba(55,138,221,0.3);
+}
+.arrow-teal {
+    background: rgba(29,158,117,0.2);
+    border: 1px solid rgba(29,158,117,0.3);
+}
+
+/* ===== INFOBAR ===== */
+.infobar {
+    background: rgba(192,32,22,0.08);
+    border: 1px solid rgba(192,32,22,0.18);
+    border-radius: 12px;
+    padding: 13px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.infobar-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* ===== SCROLL HINT ===== */
+.scroll-hint {
+    text-align: center;
+    margin-top: 24px;
+}
+.scroll-hint p {
+    color: rgba(255,255,255,0.25);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.scroll-dot {
+    width: 4px;
+    height: 24px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+.scroll-dot::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.5);
+    border-radius: 2px;
+    animation: scrollAnim 1.8s ease-in-out infinite;
+}
+@keyframes scrollAnim {
+    0%   { top: -100%; }
+    60%  { top: 100%; }
+    100% { top: 100%; }
+}
+
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 0 32px;
+}
+
+/* ===== CARD ANIMASI SVG BACKGROUND ===== */
+.card-anim {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    filter: blur(2px);
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-nav:hover .card-anim {
+    opacity: 1;
+}
+
+/* Pastikan konten kartu tetap di atas animasi */
+.card-nav > div,
+.card-nav > p,
+.card-nav > .card-footer,
+.card-nav > .card-footer-sm {
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== TOPBAR DASHBOARD BUTTON ===== */
+.btn-dashboard {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-dashboard:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ===== SECTIONS ===== */
+.section {
+    padding: 64px 32px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+.section-tag {
+    display: inline-block;
+    background: rgba(192,32,22,0.15);
+    border: 1px solid rgba(192,32,22,0.25);
+    color: #ff8a80;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+.section-title {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #fff;
+}
+.section-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 28px;
+}
+
+/* Indibiz hero card */
+.indibiz-hero {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.indibiz-logo-box {
+    width: 80px;
+    height: 56px;
+    border-radius: 12px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 8px;
+}
+.indibiz-logo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.indibiz-hero-text h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #fff;
+}
+.indibiz-hero-text p {
+    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+.indibiz-tagline {
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 6px !important;
+    letter-spacing: 0.3px;
+}
+
+/* 4 Pilar */
+.pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.pillar-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color 0.2s, background 0.2s;
+}
+.pillar-card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.13);
+}
+.pillar-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: rgba(4,119,224,0.15);
+    border: 1px solid rgba(4,119,224,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #60a5fa;
+    flex-shrink: 0;
+}
+.pillar-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    color: #fff;
+}
+.pillar-desc {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+/* Segments */
+.segments-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.segments-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+.seg-chip {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+}
+.seg-chip:hover {
+    background: rgba(4,119,224,0.08);
+    border-color: rgba(4,119,224,0.25);
+}
+.seg-chip i {
+    font-size: 18px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+    display: block;
+}
+.seg-chip:hover i { color: #60a5fa; }
+.seg-chip p {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+.seg-chip:hover p { color: rgba(255,255,255,0.65); }
+
+/* Fitur */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+.feat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.feat-card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.15);
+}
+.feat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.feat-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #fff;
+}
+.feat-desc {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* Timeline */
+.timeline {
+    display: flex;
+    flex-direction: column;
+}
+.timeline-item {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 28px;
+    position: relative;
+}
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.08);
+}
+.tl-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(192,32,22,0.2);
+    border: 1px solid rgba(192,32,22,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.tl-content { padding-top: 4px; }
+.tl-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    color: #fff;
+}
+.tl-desc {
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+/* Footer */
+.footer-section {
+    background: rgba(255,255,255,0.02);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.footer-left p {
+    color: rgba(255,255,255,0.25);
+    font-size: 11px;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 16px;
+}
+.footer-brand-logo {
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+}
+.footer-brand-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .section { padding: 40px 16px; }
+    .pillars-grid { grid-template-columns: 1fr; }
+    .segments-grid { grid-template-columns: repeat(2, 1fr); }
+    .features-grid { grid-template-columns: 1fr; }
+    .footer-section {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    .indibiz-hero {
+        flex-direction: column;
+        text-align: center;
+    }
 }
