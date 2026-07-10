@@ -1,467 +1,505 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytic Data</title>
+    <title>Analytics — BizzMap</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/styleanalytics.css') }}">
-
 </head>
 <body>
 @include('partials.loading-screen')
-    @php
-        $segMap = collect($segmentAnalytics ?? [])->keyBy('segment');
 
-        $getCount = function(string $segment, string $field) use ($segMap) {
-            $row = $segMap->get($segment);
-            return (int) ($row->$field ?? 0);
-        };
+@php
+    $segMap = collect($segmentAnalytics ?? [])->keyBy('segment');
 
-        $getExtra = function(string $segment) use ($segmentExtra) {
-            return $segmentExtra[$segment] ?? [
-                'non_customer_count' => 0,
-                'potential_count'    => 0,
-                'rekomendasi'        => 'Data belum tersedia.',
-                'bulan_ini'          => 0,
-                'bulan_lalu'         => 0,
-                'selisih'            => 0,
-            ];
-        };
-    @endphp
+    $getCount = function(string $segment, string $field) use ($segMap) {
+        $row = $segMap->get($segment);
+        return (int) ($row->$field ?? 0);
+    };
 
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between mb-4">
-            <a href="javascript:history.back()" class="btn btn-light">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1 class="text-center mb-0 flex-grow-1">Analytic</h1>
-            <a href="{{ url('/menu') }}" class="btn btn-light">
-                <i class="fas fa-home"></i> Home
-            </a>
+    $getExtra = function(string $segment) use ($segmentExtra) {
+        return $segmentExtra[$segment] ?? [
+            'non_customer_count' => 0,
+            'potential_count'    => 0,
+            'rekomendasi'        => 'Data belum tersedia.',
+            'bulan_ini'          => 0,
+            'bulan_lalu'         => 0,
+            'selisih'            => 0,
+        ];
+    };
+@endphp
+
+{{-- HEADER GELAP --}}
+<div class="ap-header">
+    <div class="ap-header-left">
+        <a href="javascript:history.back()" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <span class="ap-title">Analytics</span>
+    </div>
+    <a href="{{ url('/menu') }}" class="home-btn">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+{{-- STATS STRIP --}}
+<div class="stats-strip">
+    <p class="stats-strip-title">Ringkasan data</p>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-num">{{ $totalLokasi ?? 0 }}</div>
+            <div class="stat-label">Total lokasi</div>
         </div>
-
-        <!-- Switch between Customer and Non-Customer -->
-        <div class="d-flex justify-content-center mb-4">
-            <button id="btn-customer" class="btn btn-primary me-2">Customer</button>
-            <button id="btn-non-customer" class="btn btn-secondary">Non-Customer</button>
+        <div class="stat-item">
+            <div class="stat-num">{{ $customerTotal ?? 0 }}</div>
+            <div class="stat-label">Customer</div>
         </div>
+        <div class="stat-item accent">
+            <div class="stat-num">{{ $nonCustomerTotal ?? 0 }}</div>
+            <div class="stat-label">Non-customer</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">{{ collect($segmentAnalytics ?? [])->count() }}</div>
+            <div class="stat-label">Segmen aktif</div>
+        </div>
+    </div>
+</div>
 
-        <div id="empty-analytics-alert" class="alert alert-info d-none">
+{{-- TOGGLE --}}
+<div class="toggle-area">
+    <div class="toggle-group">
+        <button id="btn-customer" class="toggle-btn active">Customer</button>
+        <button id="btn-non-customer" class="toggle-btn">Non-Customer</button>
+    </div>
+    <div class="toggle-label">
+        <span class="toggle-dot"></span>
+        Data real-time
+    </div>
+</div>
+
+{{-- CONTENT --}}
+<div class="content-area">
+
+    <div id="empty-analytics-alert" class="d-none">
         <div class="fw-semibold">Belum ada data untuk dianalisis.</div>
         <div class="small">
             Jika data sudah di-approve tapi angka masih kosong, buka halaman <b>Map</b> terlebih dahulu
             agar data tersinkron ke perangkat (localStorage).
         </div>
-        </div>
-
-        <div id="customer-segment" class="row">
-            <!-- Indibiz Segments -->
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-building summary-icon"></i>
-                    <h2>Indibiz Ruko</h2>
-                        <p>
-                        Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Ruko adalah sebanyak
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'ruko']) }}"
-                            title="Download CSV (Customer - Ruko)">
-                            {{ $getCount('ruko','customer') }}
-                        </a>
-                        </p>
-                    <p id="indibiz-ruko-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-school summary-icon"></i>
-                    <h2>Indibiz Sekolah</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Sekolah adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'sekolah']) }}"
-                            title="Download CSV (Customer - Sekolah)">
-                            {{ $getCount('sekolah', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-sekolah-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-hotel summary-icon"></i>
-                    <h2>Indibiz Hotel</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Hotel adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'hotel']) }}"
-                            title="Download CSV (Customer - Hotel)">
-                            {{ $getCount('hotel', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-hotel-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-money-bill summary-icon"></i>
-                    <h2>Indibiz MultiFinance</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz MultiFinance adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'multifinance']) }}"
-                            title="Download CSV (Customer - MultiFinance)">
-                            {{ $getCount('multifinance', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-multifinance-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-house-medical summary-icon"></i>
-                    <h2>Indibiz Health</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Health adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'health']) }}"
-                            title="Download CSV (Customer - Health)">
-                            {{ $getCount('health', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-health-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-truck summary-icon"></i>
-                    <h2>Indibiz Ekspedisi</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Ekspedisi adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'ekspedisi']) }}"
-                            title="Download CSV (Customer - Ekspedisi)">
-                            {{ $getCount('ekspedisi', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-ekspedisi-message"></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-bolt summary-icon"></i>
-                    <h2>Indibiz Energy</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Indibiz Energy adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'customer', 'segment' => 'energi']) }}"
-                            title="Download CSV (Customer - Energy)">
-                            {{ $getCount('energi', 'customer') }}
-                        </a>
-                    </p>
-                    <p id="indibiz-energy-message"></p>
-                </div>
-            </div>
-        </div>
-
-        <div id="non-customer-segment" class="row" style="display: none;">
-            <!-- Non-Customer Segments -->
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-building summary-icon"></i>
-                    <h2>Ruko</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Ruko adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'ruko']) }}"
-                            title="Download CSV (Non-Customer - Ruko)">
-                            {{ $getCount('ruko', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="ruko-message"></p>
-                    @php $extra = $getExtra('ruko'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-school summary-icon"></i>
-                    <h2>Sekolah</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Sekolah adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'sekolah']) }}"
-                            title="Download CSV (Non-Customer - Sekolah)">
-                            {{ $getCount('sekolah', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="sekolah-message"></p>
-                    @php $extra = $getExtra('sekolah'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-hotel summary-icon"></i>
-                    <h2>Hotel</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Hotel adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'hotel']) }}"
-                            title="Download CSV (Non-Customer - Hotel)">
-                            {{ $getCount('hotel', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="hotel-message"></p>
-                    @php $extra = $getExtra('hotel'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-money-bill summary-icon"></i>
-                    <h2>MultiFinance</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen MultiFinance adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'multifinance']) }}"
-                            title="Download CSV (Non-Customer - MultiFinance)">
-                            {{ $getCount('multifinance', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="multifinance-message"></p>
-                    @php $extra = $getExtra('multifinance'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-house-medical summary-icon"></i>
-                    <h2>Health</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Health adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'health']) }}"
-                            title="Download CSV (Non-Customer - Health)">
-                            {{ $getCount('health', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="health-message"></p>
-                    @php $extra = $getExtra('health'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-truck summary-icon"></i>
-                    <h2>Ekspedisi</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Ekspedisi adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'ekspedisi']) }}"
-                            title="Download CSV (Non-Customer - Ekspedisi)">
-                            {{ $getCount('ekspedisi', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="ekspedisi-message"></p>
-                    @php $extra = $getExtra('ekspedisi'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="summary-box">
-                    <i class="fa-solid fa-bolt summary-icon"></i>
-                    <h2>Energy</h2>
-                    <p>Berdasarkan data demografi, jumlah pengguna pada segmen Energy adalah sebanyak 
-                        <a class="highlighted-count count-link"
-                            href="{{ route('analytics.download', ['type' => 'non_customer', 'segment' => 'energi']) }}"
-                            title="Download CSV (Non-Customer - Energy)">
-                            {{ $getCount('energi', 'non_customer') }}
-                        </a>
-                    </p>
-                    <p id="energy-message"></p>
-                    @php $extra = $getExtra('energi'); @endphp
-                    <div style="background:#FFF9F9;border-left:3px solid #C02016;
-                                border-radius:0 8px 8px 0;padding:10px 14px;
-                                margin-top:10px;text-align:left;">
-                        <div style="font-size:13px;color:#333;">
-                            💡 <span style="font-style:italic;">{{ $extra['rekomendasi'] }}</span>
-                        </div>
-                        @if($extra['potential_count'] > 0)
-                        <div style="font-size:12px;color:#92400E;margin-top:6px;">
-                            ⭐ {{ $extra['potential_count'] }} dari
-                            {{ $extra['non_customer_count'] }} sudah ditandai potensial
-                        </div>
-                        @endif
-                        <div style="font-size:12px;color:#666;margin-top:4px;">
-                            @if($extra['selisih'] > 0)
-                                📈 <span style="color:#10B981;font-weight:600;">+{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @elseif($extra['selisih'] < 0)
-                                📉 <span style="color:#C02016;font-weight:600;">{{ $extra['selisih'] }}</span>
-                                dibanding bulan lalu ({{ $extra['bulan_lalu'] }} → {{ $extra['bulan_ini'] }})
-                            @else
-                                ➖ Sama dengan bulan lalu ({{ $extra['bulan_ini'] }})
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <script>
-    function setCountClickable(el, clickable) {
+    {{-- CUSTOMER SEGMENT --}}
+    <div id="customer-segment">
+        <div class="section-label">Segmen Indibiz — Customer</div>
+        <div class="card-grid">
+
+            {{-- Ruko --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-store"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('ruko','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Ruko</p>
+                <p class="seg-desc">Segmen pertokoan dan ruko</p>
+                <div class="seg-rekomendasi" id="indibiz-ruko-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('ruko','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'ruko']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- Sekolah --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-school"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('sekolah','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Sekolah</p>
+                <p class="seg-desc">Segmen institusi pendidikan</p>
+                <div class="seg-rekomendasi" id="indibiz-sekolah-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('sekolah','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'sekolah']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- Hotel --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-hotel"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('hotel','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Hotel</p>
+                <p class="seg-desc">Segmen perhotelan dan penginapan</p>
+                <div class="seg-rekomendasi" id="indibiz-hotel-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('hotel','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'hotel']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- MultiFinance --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-coins"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('multifinance','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz MultiFinance</p>
+                <p class="seg-desc">Segmen keuangan dan multifinance</p>
+                <div class="seg-rekomendasi" id="indibiz-multifinance-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('multifinance','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'multifinance']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- Health --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-heartbeat"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('health','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Health</p>
+                <p class="seg-desc">Segmen layanan kesehatan</p>
+                <div class="seg-rekomendasi" id="indibiz-health-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('health','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'health']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- Ekspedisi --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-truck"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('ekspedisi','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Ekspedisi</p>
+                <p class="seg-desc">Segmen logistik dan ekspedisi</p>
+                <div class="seg-rekomendasi" id="indibiz-ekspedisi-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('ekspedisi','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'ekspedisi']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+            {{-- Energy --}}
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-bolt"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('energi','customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Indibiz Energy</p>
+                <p class="seg-desc">Segmen energi dan pertambangan</p>
+                <div class="seg-rekomendasi" id="indibiz-energy-message">Memuat rekomendasi...</div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('energi','customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'customer','segment'=>'energi']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    <span class="seg-trend neutral">—</span>
+                </div>
+            </div>
+
+        </div>
+    </div>{{-- /#customer-segment --}}
+
+    {{-- NON-CUSTOMER SEGMENT --}}
+    <div id="non-customer-segment" style="display:none;">
+        <div class="section-label">Segmen Indibiz — Non-Customer</div>
+        <div class="card-grid">
+
+            {{-- Ruko --}}
+            @php $extra = $getExtra('ruko'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-store"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('ruko','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Ruko</p>
+                <p class="seg-desc">Segmen pertokoan dan ruko</p>
+                <div class="seg-rekomendasi" id="ruko-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('ruko','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'ruko']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Sekolah --}}
+            @php $extra = $getExtra('sekolah'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-school"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('sekolah','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Sekolah</p>
+                <p class="seg-desc">Segmen institusi pendidikan</p>
+                <div class="seg-rekomendasi" id="sekolah-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('sekolah','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'sekolah']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Hotel --}}
+            @php $extra = $getExtra('hotel'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-hotel"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('hotel','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Hotel</p>
+                <p class="seg-desc">Segmen perhotelan dan penginapan</p>
+                <div class="seg-rekomendasi" id="hotel-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('hotel','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'hotel']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- MultiFinance --}}
+            @php $extra = $getExtra('multifinance'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-coins"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('multifinance','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">MultiFinance</p>
+                <p class="seg-desc">Segmen keuangan dan multifinance</p>
+                <div class="seg-rekomendasi" id="multifinance-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('multifinance','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'multifinance']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Health --}}
+            @php $extra = $getExtra('health'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-heartbeat"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('health','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Health</p>
+                <p class="seg-desc">Segmen layanan kesehatan</p>
+                <div class="seg-rekomendasi" id="health-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('health','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'health']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Ekspedisi --}}
+            @php $extra = $getExtra('ekspedisi'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-truck"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('ekspedisi','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Ekspedisi</p>
+                <p class="seg-desc">Segmen logistik dan ekspedisi</p>
+                <div class="seg-rekomendasi" id="ekspedisi-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('ekspedisi','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'ekspedisi']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Energy --}}
+            @php $extra = $getExtra('energi'); @endphp
+            <div class="seg-card">
+                <div class="seg-card-top">
+                    <div class="seg-icon"><i class="fas fa-bolt"></i></div>
+                    <span class="seg-count-badge">{{ $getCount('energi','non_customer') }} lokasi</span>
+                </div>
+                <p class="seg-name">Energy</p>
+                <p class="seg-desc">Segmen energi dan pertambangan</p>
+                <div class="seg-rekomendasi" id="energy-message">
+                    💡 <em>{{ $extra['rekomendasi'] }}</em>
+                    @if($extra['potential_count'] > 0)
+                        <br><small style="color:#92400E;">⭐ {{ $extra['potential_count'] }} dari {{ $extra['non_customer_count'] }} sudah ditandai potensial</small>
+                    @endif
+                </div>
+                <div class="seg-footer">
+                    <a class="seg-download count-link"
+                       data-count="{{ $getCount('energi','non_customer') }}"
+                       href="{{ route('analytics.download', ['type'=>'non_customer','segment'=>'energi']) }}"
+                       title="Download CSV">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                    @if($extra['selisih'] > 0)
+                        <span class="seg-trend">↑ +{{ $extra['selisih'] }}</span>
+                    @elseif($extra['selisih'] < 0)
+                        <span class="seg-trend down">↓ {{ $extra['selisih'] }}</span>
+                    @else
+                        <span class="seg-trend neutral">— Stabil</span>
+                    @endif
+                </div>
+            </div>
+
+        </div>
+    </div>{{-- /#non-customer-segment --}}
+
+</div>{{-- /.content-area --}}
+
+{{-- PAGE FOOTER --}}
+<div class="page-footer">
+    <span class="footer-info">BizzMap · PT Telkom Indonesia Branch Jambi</span>
+    <span class="footer-badge">Indibiz Analytics</span>
+</div>
+
+<script>
+function setCountClickable(el, clickable) {
     if (!el) return;
     el.style.textDecoration = clickable ? "underline" : "none";
     el.style.cursor = clickable ? "pointer" : "default";
-    }
+}
 
-    // ambil elemen tombol & section (ID harus sama dengan HTML)
-const btnCustomer = document.getElementById("btn-customer");
+const btnCustomer    = document.getElementById("btn-customer");
 const btnNonCustomer = document.getElementById("btn-non-customer");
-const customerSection = document.getElementById("customer-segment");
+const customerSection    = document.getElementById("customer-segment");
 const nonCustomerSection = document.getElementById("non-customer-segment");
-
 const alertEl = document.getElementById("empty-analytics-alert");
 
-// disable link download kalau count = 0, dan tampilkan alert kalau total = 0
 function applyAnalyticsEmptyState() {
     let total = 0;
 
     document.querySelectorAll(".count-link").forEach((a) => {
-        const n = parseInt(a.textContent.trim(), 10) || 0;
+        // Baca count dari data-count (format baru) atau textContent (fallback)
+        const n = parseInt(a.dataset.count ?? a.textContent.trim(), 10) || 0;
         total += n;
 
         if (n === 0) {
-            // non-aktifkan link (tidak bisa diklik)
             a.style.textDecoration = "none";
             a.style.cursor = "default";
             a.style.pointerEvents = "none";
@@ -469,7 +507,6 @@ function applyAnalyticsEmptyState() {
             a.setAttribute("aria-disabled", "true");
             a.setAttribute("tabindex", "-1");
         } else {
-            // pastikan link aktif
             a.style.textDecoration = "underline";
             a.style.cursor = "pointer";
             a.style.pointerEvents = "auto";
@@ -486,33 +523,23 @@ function applyAnalyticsEmptyState() {
     }
 }
 
-// jalankan saat halaman dibuka
 applyAnalyticsEmptyState();
 
-    btnCustomer.addEventListener('click', function() {
-        customerSection.style.display = 'flex';
-        customerSection.style.flexWrap = 'wrap';
-        nonCustomerSection.style.display = 'none';
+btnCustomer.addEventListener('click', function() {
+    customerSection.style.display = 'block';
+    nonCustomerSection.style.display = 'none';
+    btnCustomer.classList.add('active');
+    btnNonCustomer.classList.remove('active');
+});
 
-        btnCustomer.classList.add('btn-primary');
-        btnCustomer.classList.remove('btn-secondary');
-        btnNonCustomer.classList.add('btn-secondary');
-        btnNonCustomer.classList.remove('btn-primary');
-    });
+btnNonCustomer.addEventListener('click', function() {
+    nonCustomerSection.style.display = 'block';
+    customerSection.style.display = 'none';
+    btnNonCustomer.classList.add('active');
+    btnCustomer.classList.remove('active');
+});
+</script>
 
-    btnNonCustomer.addEventListener('click', function() {
-        nonCustomerSection.style.display = 'flex';
-        nonCustomerSection.style.flexWrap = 'wrap';
-        customerSection.style.display = 'none';
-
-        btnNonCustomer.classList.add('btn-primary');
-        btnNonCustomer.classList.remove('btn-secondary');
-        btnCustomer.classList.add('btn-secondary');
-        btnCustomer.classList.remove('btn-primary');
-    });
-    </script>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
