@@ -147,8 +147,8 @@ body {
     padding: 24px;
     cursor: pointer;
     transition: transform 0.25s, border-color 0.25s;
-    position: relative;
-    overflow: hidden;
+    position: relative !important;
+    overflow: hidden !important;
     text-decoration: none;
     display: block;
     color: #fff;
@@ -172,7 +172,9 @@ body {
 .card-hero {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.10);
-    min-height: 260px;
+    min-height: 260px !important;
+    max-height: 320px !important;
+    height: 320px !important;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -194,7 +196,9 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 120px;
+    min-height: 140px !important;
+    max-height: 155px !important;
+    height: 155px !important;
 }
 .card-demo::before {
     background: radial-gradient(ellipse at 80% 50%,
@@ -375,15 +379,17 @@ body {
 
 /* ===== CARD ANIMASI SVG BACKGROUND ===== */
 .card-anim {
-    position: absolute;
-    inset: 0;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
     opacity: 0;
     transition: opacity 0.4s ease;
     filter: blur(2px);
     pointer-events: none;
     z-index: 0;
     border-radius: 16px;
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
