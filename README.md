@@ -1,66 +1,167 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🗺️ BizzMap
 
-## About Laravel
+**GIS Platform for Indibiz Customer & Non-Customer Segment Mapping**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+PT Telkom Indonesia — Branch Jambi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
+[![Leaflet](https://img.shields.io/badge/Leaflet.js-Maps-199900?style=flat&logo=leaflet&logoColor=white)](https://leafletjs.com)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?style=flat&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
+[![Chart.js](https://img.shields.io/badge/Chart.js-Data%20Viz-FF6384?style=flat&logo=chart.js&logoColor=white)](https://www.chartjs.org)
+[![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+[Live Demo](https://bizzmap.web.id) · [Report Bug](https://github.com/Adeebs11/bizzmap/issues)
 
-## Learning Laravel
+</div>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 📌 About
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**BizzMap** is a web-based GIS application built to help PT Telkom Indonesia's sales team map, track, and analyze **Indibiz** customer and non-customer segments across 8 districts in Jambi City. It combines interactive mapping, real-time GPS integration, and data-driven analytics into a single tool designed for field teams.
 
-## Laravel Sponsors
+Built with **Extreme Programming (XP)** methodology across three iterations — from core authentication to advanced data visualization.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## ✨ Showcase
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Landing Page
+Split-diagonal hero with a Lottie-powered location animation, editorial typography, and floating data cards.
 
-## Contributing
+![Landing Page](docs/screenshots/landing.png)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Interactive Map
+Full-featured Leaflet map with marker clustering, heatmap, district boundaries, GPS "My Location," and automatic reverse geocoding.
 
-## Code of Conduct
+![Map Page](docs/screenshots/peta.png)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Demographics Dashboard
+Real-time charts covering customer segment distribution, revenue ranges, subscription packages, and conversion/churn trends.
 
-## Security Vulnerabilities
+![Demografi Page](docs/screenshots/demografi.png)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Navigation Hub
+A hover-animated menu connecting Map, Demographics, and Analytics — each card reveals contextual background animation on interaction.
 
-## License
+![Menu Page](docs/screenshots/menu.png)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🚀 Key Features
+
+| Feature | Description |
+|---|---|
+| 🗺️ **Interactive Mapping** | Marker clustering, heatmap, fullscreen mode, location search, mini-map, and distance measurement |
+| 📍 **GPS Integration** | One-tap "My Location" with real-time accuracy radius and automatic reverse geocoding via Nominatim |
+| 🏘️ **District Boundaries** | Manually mapped GeoJSON boundaries for all 8 districts in Jambi City |
+| 🧭 **Duplicate Detection** | Haversine-based proximity check (50m radius) to prevent duplicate location entries |
+| 📊 **Demographic Analytics** | Segment distribution, revenue breakdown, top subscription packages, and conversion/churn trends with weekly/monthly/6-month filters |
+| 🤖 **Auto Recommendations** | Data-driven suggestions per segment based on non-customer potential |
+| 🎯 **Potential Marking** | Collaborative flagging of high-potential non-customers, synced across all users |
+| ✅ **Data Quality Flags** | Automatic detection of duplicates, suspicious names, and out-of-bounds coordinates before approval |
+| 👥 **Role-Based Access** | Three-tier permission system — Admin, Sales Assistant (SA), and Account Representative (AR) |
+| 📱 **Mobile Responsive** | Fully optimized map and dashboard views for field use, built with a mobile-first CSS layer |
+
+---
+
+## 🛠️ Tech Stack
+
+**Backend**
+- Laravel 11 (PHP)
+- MySQL
+
+**Frontend**
+- Leaflet.js — interactive mapping
+- Chart.js — data visualization
+- Bootstrap 5 — layout & components
+- Vanilla JS — animations, Lottie integration
+
+**Infrastructure**
+- JagoanHosting (shared hosting, cPanel Git deployment)
+- Nominatim OpenStreetMap API — reverse geocoding
+
+**Methodology**
+- Extreme Programming (XP) — 3 iterations: Authentication → Core Mapping → Data Visualization
+
+---
+
+## 📂 Project Structure
+
+```
+bizzmap/
+├── app/
+│   ├── Http/Controllers/     # Application logic
+│   └── Models/                # Eloquent models
+├── database/
+│   └── migrations/            # Schema definitions
+├── public/
+│   ├── css/                   # Page-specific stylesheets
+│   ├── js/                    # Client-side scripts
+│   └── animations/            # Lottie JSON assets
+├── resources/
+│   └── views/                 # Blade templates
+└── routes/
+    └── web.php                # Application routes
+```
+
+---
+
+## ⚙️ Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Adeebs11/bizzmap.git
+cd bizzmap
+
+# Install dependencies
+composer install
+npm install
+
+# Environment setup
+cp .env.example .env
+php artisan key:generate
+
+# Configure your database in .env, then run:
+php artisan migrate
+
+# Serve locally
+php artisan serve
+```
+
+Visit `http://localhost:8000` to get started.
+
+---
+
+## 👤 User Roles
+
+| Role | Access |
+|---|---|
+| **Admin** | Full access to all operational pages and user management (Admin/AR/SA) |
+| **AR** *(Account Representative)* | Equal access to Admin on all operational pages, except managing Admin/AR accounts (can only manage SA) |
+| **SA** *(Sales Assistant)* | Field data entry, map access, and Goals Plan visibility |
+
+---
+
+## 🎓 Academic Context
+
+BizzMap was developed as an undergraduate thesis project for the **Information Systems Program, Universitas Jambi**, in collaboration with PT Telkom Indonesia Branch Jambi.
+
+**Title:** *Rancang Bangun Website Pemetaan Segmen Pelanggan dan Non-Pelanggan PT. Telkom Indonesia Branch Jambi Menggunakan Metode Extreme Programming*
+
+---
+
+## 📄 License
+
+This project is developed for academic purposes. Please contact the author for reuse or collaboration inquiries.
+
+---
+
+<div align="center">
+
+**Adib Yasykur Rizkillah**
+Information Systems, Universitas Jambi
+
+</div>
