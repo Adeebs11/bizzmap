@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demografi</title>
+    <title>Demografi — BizzMap</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/styledemografi.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,457 +15,417 @@
             opacity: 1 !important;
         }
     </style>
-
 </head>
 <body>
 @include('partials.loading-screen')
-    <div class="d-flex">
-        <div class="sidebar">
-            <h2>Menu</h2>
-            <ul>
-                <li><a href="{{ url("/menu") }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
-                <li><a href="{{ url("/geo") }}"><i class="fas fa-map-marker-alt"></i> <span>Map</span></a></li>
-                <li><a href="{{ url("/analytics") }}"><i class="fas fa-chart-pie"></i> <span>Analytic</span></a></li>
-            </ul>
+
+{{-- TOPBAR (gantikan sidebar) --}}
+<div class="dp-topbar">
+    <div class="topbar-left">
+        <div class="topbar-logo">
+            <div class="topbar-icon">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <span class="topbar-name">BizzMap</span>
         </div>
-        <div class="container mt-5" id="main-content">
-            <div id="demografi-header">
-                <div class="d-flex justify-content-between mb-4">
-                    <a href="javascript:history.back()" class="btn btn-light back-button">
-                        <i class="fas fa-arrow-left"></i>
-                        <span class="back-button-text">Back</span>
-                    </a>
-                </div>
-                <h1 class="text-center mb-5">DEMOGRAFI</h1>
-            </div>
+        <div class="topbar-divider"></div>
+        <span class="topbar-page">Demografi</span>
+    </div>
+    <div class="topbar-right">
+        <a href="{{ url('/geo') }}" class="top-nav-btn">
+            <i class="fas fa-map-marker-alt"></i> Peta
+        </a>
+        <a href="{{ url('/demografi') }}" class="top-nav-btn active">
+            <i class="fas fa-users"></i> Demografi
+        </a>
+        <a href="{{ url('/analytics') }}" class="top-nav-btn">
+            <i class="fas fa-chart-line"></i> Analytics
+        </a>
+        <a href="{{ url('/menu') }}" class="top-nav-btn">
+            <i class="fas fa-home"></i>
+        </a>
+    </div>
+</div>
 
-            @php
-            $totalAll = (int)$customerTotal + (int)$nonCustomerTotal;
-            @endphp
+<div class="dp-content">
 
-            @if($totalAll === 0)
-            <div class="alert alert-info">
-                <div class="fw-semibold">Data demografi belum tersedia.</div>
-                <div class="small">
-                Belum ada data lokasi yang berstatus <b>approved</b>.
-                Silakan input data melalui halaman Peta, lalu tunggu verifikasi admin.
-                </div>
-            </div>
-            @endif
+    @php
+    $totalAll = (int)$customerTotal + (int)$nonCustomerTotal;
+    @endphp
 
-            {{-- 4 Kartu Statistik --}}
-            <div class="row g-3 mb-4" id="stat-cards-row">
-              @php
-                $statCards = [
-                    ['icon'=>'fa-map-marker-alt','label'=>'Total Lokasi',
-                     'value'=>$totalLokasi,'color'=>'#3B82F6','bg'=>'#EFF6FF'],
-                    ['icon'=>'fa-user-check','label'=>'Customer',
-                     'value'=>$customerTotal,'color'=>'#10B981','bg'=>'#ECFDF5'],
-                    ['icon'=>'fa-user-times','label'=>'Non-Customer',
-                     'value'=>$nonCustomerTotal,'color'=>'#C02016','bg'=>'#FEF2F2'],
-                    ['icon'=>'fa-clock','label'=>'Pending Verifikasi',
-                     'value'=>$totalPending,'color'=>'#F59E0B','bg'=>'#FFFBEB'],
-                ];
-              @endphp
-              @foreach($statCards as $card)
-              <div class="col-6 col-md-3">
-                <div style="background:{{ $card['bg'] }};border-radius:12px;
-                            padding:18px;position:relative;overflow:hidden;
-                            box-shadow:0 2px 8px rgba(0,0,0,0.06);
-                            transition:transform 0.2s;"
-                     onmouseover="this.style.transform='translateY(-3px)'"
-                     onmouseout="this.style.transform='translateY(0)'">
-                  <i class="fas {{ $card['icon'] }}"
-                     style="position:absolute;right:10px;top:10px;
-                            font-size:32px;color:{{ $card['color'] }};
-                            opacity:0.12;"></i>
-                  <div style="font-size:26px;font-weight:700;
-                              color:{{ $card['color'] }};">
-                    {{ $card['value'] }}
-                  </div>
-                  <div style="font-size:12px;color:#555;margin-top:3px;
-                              font-weight:500;">
-                    {{ $card['label'] }}
-                  </div>
-                </div>
-              </div>
-              @endforeach
-            </div>
-
-            <div class="row text-center mb-4">
-                {{-- Wrapper agar ada jarak dari info box atas --}}
-                <div class="segment-badge-wrapper">
-                    <div class="row g-3">
-
-                        {{-- Segmen Customer Dominan --}}
-                        <div class="col-md-6">
-                            <div class="alert segment-alert segment-customer">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-briefcase-fill segment-icon me-2"></i>
-                                        <strong>Segmen Customer Dominan</strong>
-                                    </div>
-                                    <span class="badge segment-badge text-uppercase">
-                                        {{ $dominantCustomerSegment ?? '-' }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Segmen Non-Customer Dominan --}}
-                        <div class="col-md-6">
-                            <div class="alert segment-alert segment-noncustomer">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-exclamation-circle-fill segment-icon me-2"></i>
-                                        <strong>Segmen Non-Customer Dominan</strong>
-                                    </div>
-                                    <span class="badge segment-badge text-uppercase">
-                                        {{ $dominantNonCustomerSegment ?? '-' }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-        @if($totalAll > 0)
-            <div class="row gx-3 gy-2 mb-3">
-                <div class="col-lg-8 mx-auto">
-                    <div class="chart-card" style="height:auto;min-height:400px;position:relative;padding:16px 16px 12px;">
-
-                        <div id="chartCarousel" class="carousel slide" data-bs-ride="false">
-                            <div class="carousel-inner" style="height:320px;">
-
-                                <div class="carousel-item active">
-                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
-                                        Customer vs Non-Customer
-                                    </h6>
-                                    <div style="position:relative;height:280px;">
-                                        <canvas id="businessTypeChart"></canvas>
-                                    </div>
-                                </div>
-
-                                <div class="carousel-item">
-                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
-                                        Distribusi Segmen Customer
-                                    </h6>
-                                    <div style="position:relative;height:280px;">
-                                        <canvas id="segmentCustomerChart"></canvas>
-                                    </div>
-                                </div>
-
-                                <div class="carousel-item">
-                                    <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
-                                        Distribusi Segmen Non-Customer
-                                    </h6>
-                                    <div style="position:relative;height:280px;">
-                                        <canvas id="segmentNonCustomerChart"></canvas>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <button class="carousel-control-prev" type="button"
-                                    data-bs-target="#chartCarousel" data-bs-slide="prev"
-                                    style="width:36px;height:36px;top:50%;transform:translateY(-50%);
-                                           background:rgba(192,32,22,0.7);border-radius:50%;left:-5px;">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button"
-                                    data-bs-target="#chartCarousel" data-bs-slide="next"
-                                    style="width:36px;height:36px;top:50%;transform:translateY(-50%);
-                                           background:rgba(192,32,22,0.7);border-radius:50%;right:-5px;">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
-
-                            <div class="carousel-indicators"
-                                 style="position:relative;bottom:0;margin:8px 0 0;
-                                        display:flex;justify-content:center;gap:6px;">
-                                <button type="button" data-bs-target="#chartCarousel"
-                                        data-bs-slide-to="0" class="active" aria-current="true"
-                                        style="width:8px !important;height:8px !important;
-                                               border-radius:50% !important;
-                                               background-color:#C02016 !important;
-                                               border:none !important;
-                                               opacity:0.4;text-indent:-9999px;
-                                               padding:0;margin:0;"></button>
-                                <button type="button" data-bs-target="#chartCarousel"
-                                        data-bs-slide-to="1"
-                                        style="width:8px !important;height:8px !important;
-                                               border-radius:50% !important;
-                                               background-color:#C02016 !important;
-                                               border:none !important;
-                                               opacity:0.4;text-indent:-9999px;
-                                               padding:0;margin:0;"></button>
-                                <button type="button" data-bs-target="#chartCarousel"
-                                        data-bs-slide-to="2"
-                                        style="width:8px !important;height:8px !important;
-                                               border-radius:50% !important;
-                                               background-color:#C02016 !important;
-                                               border:none !important;
-                                               opacity:0.4;text-indent:-9999px;
-                                               padding:0;margin:0;"></button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            {{-- P3B: Analisis Detail — Omset, Paket, Bidang Bisnis --}}
-            <div style="margin-top:28px;" id="analisis-detail-section">
-                <h6 style="font-weight:700;color:#111;margin-bottom:16px;
-                           border-left:3px solid #C02016;padding-left:10px;">
-                    Analisis Detail
-                </h6>
-                <div class="row g-3">
-                    {{-- Chart Omset: full width grouped bar --}}
-                    <div class="col-12">
-                        <div class="chart-card" style="height:auto;min-height:320px;padding:20px;">
-                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F4B0; Distribusi Omset</h6>
-                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Perbandingan range omset antara Customer dan Non-Customer</p>
-                            <div style="position:relative;height:240px;max-width:600px;margin:0 auto;">
-                                <canvas id="chartOmset"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Chart Paket: doughnut --}}
-                    <div class="col-md-6">
-                        <div class="chart-card" style="height:auto;min-height:340px;padding:20px;">
-                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F4E6; Top 5 Paket Langganan</h6>
-                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Paket Indibiz yang paling banyak digunakan Customer</p>
-                            @if($byPaket->count() > 0)
-                                <div style="position:relative;height:220px;max-width:280px;margin:0 auto;">
-                                    <canvas id="chartPaket"></canvas>
-                                </div>
-                            @else
-                                <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
-                                    <div style="font-size:28px;">&#x1F4E6;</div>
-                                    <div style="font-size:12px;margin-top:6px;">Belum ada data paket langganan</div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                    {{-- Chart Bidang Bisnis: vertical bar --}}
-                    <div class="col-md-6">
-                        <div class="chart-card" style="height:auto;min-height:340px;padding:20px;">
-                            <h6 style="font-weight:600;color:#333;margin-bottom:4px;">&#x1F3E2; Top 5 Bidang Bisnis</h6>
-                            <p style="font-size:12px;color:#888;margin:0 0 8px;">Jenis usaha yang paling banyak tercatat di sistem</p>
-                            @if($byBidang->count() > 0)
-                                <div style="position:relative;height:220px;max-width:320px;margin:0 auto;">
-                                    <canvas id="chartBidang"></canvas>
-                                </div>
-                            @else
-                                <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
-                                    <div style="font-size:28px;">&#x1F3E2;</div>
-                                    <div style="font-size:12px;margin-top:6px;">Belum ada data bidang bisnis</div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div style="background:#F8F9FA;border-radius:10px;padding:12px 16px;margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
-                    <span style="font-size:12px;color:#666;">&#x1F4A1; Data hanya menghitung lokasi yang sudah di-approve dan memiliki nilai omset / paket / bidang bisnis terisi.</span>
-                </div>
-            </div>
-
-            {{-- Chart Tren Konversi (selalu render, data bisa kosong) --}}
-            <div class="row gx-3 gy-2 mt-3">
-              <div class="col-12">
-                <div style="background:white;border-radius:12px;
-                            padding:22px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
-                  <div style="display:flex;justify-content:space-between;
-                              align-items:center;margin-bottom:14px;
-                              flex-wrap:wrap;gap:8px;">
-                    <div>
-                      <h6 style="font-weight:700;color:#111;margin:0;">
-                        📈 Tren Konversi &amp; Churn
-                      </h6>
-                      <p style="font-size:12px;color:#888;margin:2px 0 0;">
-                        Konversi (Non→Customer) vs Churn (Customer→Non) per periode
-                      </p>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                      <select id="periodeSelector" onchange="updateTrenChart()"
-                              style="font-size:12px;padding:4px 10px;border-radius:8px;
-                                     border:1px solid #D1D5DB;background:white;cursor:pointer;
-                                     color:#374151;font-family:inherit;">
-                        <option value="weekly">1 Minggu</option>
-                        <option value="monthly">1 Bulan</option>
-                        <option value="sixmonth" selected>6 Bulan</option>
-                      </select>
-                      <div id="trenBadge" style="font-size:12px;font-weight:600;
-                           padding:4px 12px;border-radius:20px;"></div>
-                    </div>
-                  </div>
-
-                  @if($statusChanges->every(fn($m) => $m['konversi'] === 0 && $m['churn'] === 0))
-                  <p style="font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:8px;">
-                    ℹ️ Belum ada data konversi maupun churn. Riwayat akan muncul setelah ada perubahan tipe lokasi.
-                  </p>
-                  @endif
-
-                  <canvas id="chartTren" height="90"></canvas>
-
-                  <div class="row g-3 mt-3">
-                    <div class="col-6 col-md-3">
-                      <div style="background:#ECFDF5;border-radius:10px;
-                                  padding:14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:700;color:#10B981;">
-                          {{ $konversiBulanIni }}
-                        </div>
-                        <div style="font-size:11px;color:#065F46;margin-top:3px;">
-                          ✅ Konversi Bulan Ini
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                      <div style="background:#F0FDF4;border-radius:10px;
-                                  padding:14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:700;color:#6B7280;">
-                          {{ $konversiBulanLalu }}
-                        </div>
-                        <div style="font-size:11px;color:#374151;margin-top:3px;">
-                          📅 Konversi Bulan Lalu
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                      <div style="background:#FEF2F2;border-radius:10px;
-                                  padding:14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:700;color:#EF4444;">
-                          {{ $churnBulanIni }}
-                        </div>
-                        <div style="font-size:11px;color:#991B1B;margin-top:3px;">
-                          🔻 Churn Bulan Ini
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                      <div style="background:#FFF7F7;border-radius:10px;
-                                  padding:14px;text-align:center;">
-                        <div style="font-size:22px;font-weight:700;color:#9CA3AF;">
-                          {{ $churnBulanLalu }}
-                        </div>
-                        <div style="font-size:11px;color:#374151;margin-top:3px;">
-                          📅 Churn Bulan Lalu
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+    @if($totalAll === 0)
+    <div class="alert alert-info">
+        <div class="fw-semibold">Data demografi belum tersedia.</div>
+        <div class="small">
+        Belum ada data lokasi yang berstatus <b>approved</b>.
+        Silakan input data melalui halaman Peta, lalu tunggu verifikasi admin.
         </div>
+    </div>
+    @endif
+
+    {{-- 4 Kartu Statistik --}}
+    <div class="stat-grid" id="stat-cards-row">
+      @php
+        $statCards = [
+            ['icon'=>'fa-map-marker-alt','label'=>'Total Lokasi',
+             'value'=>$totalLokasi,'color'=>'#3B82F6','bg'=>'#EFF6FF'],
+            ['icon'=>'fa-user-check','label'=>'Customer',
+             'value'=>$customerTotal,'color'=>'#10B981','bg'=>'#ECFDF5'],
+            ['icon'=>'fa-user-times','label'=>'Non-Customer',
+             'value'=>$nonCustomerTotal,'color'=>'#C02016','bg'=>'#FEF2F2'],
+            ['icon'=>'fa-clock','label'=>'Pending Verifikasi',
+             'value'=>$totalPending,'color'=>'#F59E0B','bg'=>'#FFFBEB'],
+        ];
+      @endphp
+      @foreach($statCards as $card)
+      <div class="stat-card" style="background:{{ $card['bg'] }};">
+        <i class="fas {{ $card['icon'] }} stat-card-icon"
+           style="color:{{ $card['color'] }};"></i>
+        <div class="stat-card-num" style="color:{{ $card['color'] }};">
+          {{ $card['value'] }}
+        </div>
+        <div class="stat-card-label">{{ $card['label'] }}</div>
+      </div>
+      @endforeach
+    </div>
+
+    {{-- Badge Segmen Dominan --}}
+    <div class="badge-grid">
+        <div class="seg-alert-new segment-customer">
+            <div class="seg-alert-left">
+                <i class="bi bi-briefcase-fill" style="font-size:18px"></i>
+                <strong style="font-size:13px">Segmen Customer Dominan</strong>
+            </div>
+            <span class="seg-badge-pill" style="background:#0d6efd;">
+                {{ strtoupper($dominantCustomerSegment ?? '-') }}
+            </span>
+        </div>
+        <div class="seg-alert-new segment-noncustomer">
+            <div class="seg-alert-left">
+                <i class="bi bi-exclamation-circle-fill" style="font-size:18px"></i>
+                <strong style="font-size:13px">Segmen Non-Customer Dominan</strong>
+            </div>
+            <span class="seg-badge-pill" style="background:#ff002f;">
+                {{ strtoupper($dominantNonCustomerSegment ?? '-') }}
+            </span>
+        </div>
+    </div>
 
     @if($totalAll > 0)
-    <script>
-        const byType = @json($byType);
-        const segmentCustomer = @json($segmentCustomer);
-        const segmentNonCustomer = @json($segmentNonCustomer);
+    <div class="row gx-3 gy-2 mb-3">
+        <div class="col-lg-8 mx-auto">
+            <div class="chart-card-new" style="min-height:400px;position:relative;">
 
-        const pieOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.label}: ${ctx.raw}`
-                    }
-                },
-                legend: {
-                    position: 'right'
+                <div id="chartCarousel" class="carousel slide" data-bs-ride="false">
+                    <div class="carousel-inner" style="height:320px;">
+
+                        <div class="carousel-item active">
+                            <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                Customer vs Non-Customer
+                            </h6>
+                            <div class="chart-canvas-wrap h-carousel">
+                                <canvas id="businessTypeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                Distribusi Segmen Customer
+                            </h6>
+                            <div class="chart-canvas-wrap h-carousel">
+                                <canvas id="segmentCustomerChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <h6 style="text-align:center;font-weight:600;color:#333;margin-bottom:8px;">
+                                Distribusi Segmen Non-Customer
+                            </h6>
+                            <div class="chart-canvas-wrap h-carousel">
+                                <canvas id="segmentNonCustomerChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button class="carousel-control-prev" type="button"
+                            data-bs-target="#chartCarousel" data-bs-slide="prev"
+                            style="width:36px;height:36px;top:50%;transform:translateY(-50%);
+                                   background:rgba(192,32,22,0.7);border-radius:50%;left:-5px;">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button"
+                            data-bs-target="#chartCarousel" data-bs-slide="next"
+                            style="width:36px;height:36px;top:50%;transform:translateY(-50%);
+                                   background:rgba(192,32,22,0.7);border-radius:50%;right:-5px;">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+
+                    <div class="carousel-indicators"
+                         style="position:relative;bottom:0;margin:8px 0 0;
+                                display:flex;justify-content:center;gap:6px;">
+                        <button type="button" data-bs-target="#chartCarousel"
+                                data-bs-slide-to="0" class="active" aria-current="true"
+                                style="width:8px !important;height:8px !important;
+                                       border-radius:50% !important;
+                                       background-color:#C02016 !important;
+                                       border:none !important;
+                                       opacity:0.4;text-indent:-9999px;
+                                       padding:0;margin:0;"></button>
+                        <button type="button" data-bs-target="#chartCarousel"
+                                data-bs-slide-to="1"
+                                style="width:8px !important;height:8px !important;
+                                       border-radius:50% !important;
+                                       background-color:#C02016 !important;
+                                       border:none !important;
+                                       opacity:0.4;text-indent:-9999px;
+                                       padding:0;margin:0;"></button>
+                        <button type="button" data-bs-target="#chartCarousel"
+                                data-bs-slide-to="2"
+                                style="width:8px !important;height:8px !important;
+                                       border-radius:50% !important;
+                                       background-color:#C02016 !important;
+                                       border:none !important;
+                                       opacity:0.4;text-indent:-9999px;
+                                       padding:0;margin:0;"></button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- P3B: Analisis Detail — Omset, Paket, Bidang Bisnis --}}
+    <div id="analisis-detail-section">
+        <div class="section-label-dp">Analisis Detail</div>
+        <div class="row g-3">
+            {{-- Chart Omset: full width grouped bar --}}
+            <div class="col-12">
+                <div class="chart-card-new">
+                    <div class="chart-card-title">&#x1F4B0; Distribusi Omset</div>
+                    <div class="chart-card-sub">Perbandingan range omset antara Customer dan Non-Customer</div>
+                    <div class="chart-canvas-wrap h-omset">
+                        <canvas id="chartOmset"></canvas>
+                    </div>
+                </div>
+            </div>
+            {{-- Chart Paket: doughnut --}}
+            <div class="col-md-6">
+                <div class="chart-card-new">
+                    <div class="chart-card-title">&#x1F4E6; Top 5 Paket Langganan</div>
+                    <div class="chart-card-sub">Paket Indibiz yang paling banyak digunakan Customer</div>
+                    @if($byPaket->count() > 0)
+                        <div class="chart-canvas-wrap h-paket">
+                            <canvas id="chartPaket"></canvas>
+                        </div>
+                    @else
+                        <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
+                            <div style="font-size:28px;">&#x1F4E6;</div>
+                            <div style="font-size:12px;margin-top:6px;">Belum ada data paket langganan</div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            {{-- Chart Bidang Bisnis: vertical bar --}}
+            <div class="col-md-6">
+                <div class="chart-card-new">
+                    <div class="chart-card-title">&#x1F3E2; Top 5 Bidang Bisnis</div>
+                    <div class="chart-card-sub">Jenis usaha yang paling banyak tercatat di sistem</div>
+                    @if($byBidang->count() > 0)
+                        <div class="chart-canvas-wrap h-bidang">
+                            <canvas id="chartBidang"></canvas>
+                        </div>
+                    @else
+                        <div style="text-align:center;padding:30px 0;color:#9CA3AF;">
+                            <div style="font-size:28px;">&#x1F3E2;</div>
+                            <div style="font-size:12px;margin-top:6px;">Belum ada data bidang bisnis</div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        <div style="background:#F8F9FA;border-radius:10px;padding:12px 16px;margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+            <span style="font-size:12px;color:#666;">&#x1F4A1; Data hanya menghitung lokasi yang sudah di-approve dan memiliki nilai omset / paket / bidang bisnis terisi.</span>
+        </div>
+    </div>
+
+    {{-- Chart Tren Konversi & Churn --}}
+    <div class="section-label-dp" style="margin-top:28px;">Tren Konversi &amp; Churn</div>
+    <div class="chart-card-new">
+        <div style="display:flex;justify-content:space-between;
+                    align-items:center;margin-bottom:14px;
+                    flex-wrap:wrap;gap:8px;">
+            <div>
+                <div class="chart-card-title">📈 Tren Konversi &amp; Churn</div>
+                <div class="chart-card-sub">Konversi (Non→Customer) vs Churn (Customer→Non) per periode</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <select id="periodeSelector" onchange="updateTrenChart()"
+                        style="font-size:12px;padding:4px 10px;border-radius:8px;
+                               border:1px solid #D1D5DB;background:white;cursor:pointer;
+                               color:#374151;font-family:inherit;">
+                    <option value="weekly">1 Minggu</option>
+                    <option value="monthly">1 Bulan</option>
+                    <option value="sixmonth" selected>6 Bulan</option>
+                </select>
+                <div id="trenBadge" style="font-size:12px;font-weight:600;
+                     padding:4px 12px;border-radius:20px;"></div>
+            </div>
+        </div>
+
+        @if($statusChanges->every(fn($m) => $m['konversi'] === 0 && $m['churn'] === 0))
+        <p style="font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:8px;">
+            ℹ️ Belum ada data konversi maupun churn. Riwayat akan muncul setelah ada perubahan tipe lokasi.
+        </p>
+        @endif
+
+        <div class="chart-canvas-wrap h-tren">
+            <canvas id="chartTren" height="90"></canvas>
+        </div>
+
+        <div class="tren-mini-grid">
+            <div class="tren-mini" style="background:#ECFDF5;">
+                <div style="font-size:20px;font-weight:700;color:#10B981;">
+                    {{ $konversiBulanIni }}
+                </div>
+                <div style="font-size:10px;color:#065F46;margin-top:2px;">
+                    ✅ Konversi Bulan Ini
+                </div>
+            </div>
+            <div class="tren-mini" style="background:#F0FDF4;">
+                <div style="font-size:20px;font-weight:700;color:#6B7280;">
+                    {{ $konversiBulanLalu }}
+                </div>
+                <div style="font-size:10px;color:#374151;margin-top:2px;">
+                    📅 Konversi Bulan Lalu
+                </div>
+            </div>
+            <div class="tren-mini" style="background:#FEF2F2;">
+                <div style="font-size:20px;font-weight:700;color:#EF4444;">
+                    {{ $churnBulanIni }}
+                </div>
+                <div style="font-size:10px;color:#991B1B;margin-top:2px;">
+                    🔻 Churn Bulan Ini
+                </div>
+            </div>
+            <div class="tren-mini" style="background:#FFF7F7;">
+                <div style="font-size:20px;font-weight:700;color:#9CA3AF;">
+                    {{ $churnBulanLalu }}
+                </div>
+                <div style="font-size:10px;color:#374151;margin-top:2px;">
+                    📅 Churn Bulan Lalu
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>{{-- /.dp-content --}}
+
+@if($totalAll > 0)
+<script>
+    const byType = @json($byType);
+    const segmentCustomer = @json($segmentCustomer);
+    const segmentNonCustomer = @json($segmentNonCustomer);
+
+    const pieOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.label}: ${ctx.raw}`
                 }
-            }
-        };
-
-        // === PIE 1: Customer vs Non-Customer ===
-        new Chart(document.getElementById('businessTypeChart'), {
-            type: 'pie',
-            data: {
-                labels: ['Customer', 'Non-Customer'],
-                datasets: [{
-                    data: [
-                        byType.customer ?? 0,
-                        byType.non_customer ?? 0
-                    ],
-                    backgroundColor: ['#36A2EB', '#FF6384']
-                }]
             },
-            options: {
-                ...pieOptions,
-                plugins: {
-                    ...pieOptions.plugins,
-                    title: {
-                        display: true,
-                        text: 'Customer vs Non-Customer'
-                    }
-                }
+            legend: {
+                position: 'right'
             }
-        });
-
-        // === PIE 2: Segment Customer ===
-        new Chart(document.getElementById('segmentCustomerChart'), {
-            type: 'pie',
-            data: {
-                labels: Object.keys(segmentCustomer),
-                datasets: [{
-                    data: Object.values(segmentCustomer),
-                    backgroundColor: [
-                        '#36A2EB','#4BC0C0','#9966FF','#FFCE56','#FF9F40'
-                    ]
-                }]
-            },
-            options: {
-                ...pieOptions,
-                plugins: {
-                    ...pieOptions.plugins,
-                    title: {
-                        display: true,
-                        text: 'Distribusi Segmen Customer'
-                    }
-                }
-            }
-        });
-
-        // === PIE 3: Segment Non-Customer ===
-        new Chart(document.getElementById('segmentNonCustomerChart'), {
-            type: 'pie',
-            data: {
-                labels: Object.keys(segmentNonCustomer),
-                datasets: [{
-                    data: Object.values(segmentNonCustomer),
-                    backgroundColor: [
-                        '#FF6384','#FF9F40','#FFCE56','#9966FF','#4BC0C0'
-                    ]
-                }]
-            },
-            options: {
-                ...pieOptions,
-                plugins: {
-                    ...pieOptions.plugins,
-                    title: {
-                        display: true,
-                        text: 'Distribusi Segmen Non-Customer'
-                    }
-                }
-            }
-        });
-
-        const chartCarouselEl = document.getElementById('chartCarousel');
-        if (chartCarouselEl) {
-            chartCarouselEl.addEventListener('slid.bs.carousel', function () {
-                Chart.instances && Object.values(Chart.instances).forEach(
-                    function (instance) { instance.resize(); }
-                );
-            });
         }
-        </script>
+    };
+
+    // === PIE 1: Customer vs Non-Customer ===
+    new Chart(document.getElementById('businessTypeChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Customer', 'Non-Customer'],
+            datasets: [{
+                data: [
+                    byType.customer ?? 0,
+                    byType.non_customer ?? 0
+                ],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            }]
+        },
+        options: {
+            ...pieOptions,
+            plugins: {
+                ...pieOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'Customer vs Non-Customer'
+                }
+            }
+        }
+    });
+
+    // === PIE 2: Segment Customer ===
+    new Chart(document.getElementById('segmentCustomerChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(segmentCustomer),
+            datasets: [{
+                data: Object.values(segmentCustomer),
+                backgroundColor: [
+                    '#36A2EB','#4BC0C0','#9966FF','#FFCE56','#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            ...pieOptions,
+            plugins: {
+                ...pieOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'Distribusi Segmen Customer'
+                }
+            }
+        }
+    });
+
+    // === PIE 3: Segment Non-Customer ===
+    new Chart(document.getElementById('segmentNonCustomerChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(segmentNonCustomer),
+            datasets: [{
+                data: Object.values(segmentNonCustomer),
+                backgroundColor: [
+                    '#FF6384','#FF9F40','#FFCE56','#9966FF','#4BC0C0'
+                ]
+            }]
+        },
+        options: {
+            ...pieOptions,
+            plugins: {
+                ...pieOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'Distribusi Segmen Non-Customer'
+                }
+            }
+        }
+    });
+
+    const chartCarouselEl = document.getElementById('chartCarousel');
+    if (chartCarouselEl) {
+        chartCarouselEl.addEventListener('slid.bs.carousel', function () {
+            Chart.instances && Object.values(Chart.instances).forEach(
+                function (instance) { instance.resize(); }
+            );
+        });
+    }
+    </script>
 @endif
 
 <script>
